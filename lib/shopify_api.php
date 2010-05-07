@@ -139,11 +139,9 @@
 
 	class Article{
 		private $prefix = "/blogs/:blog_id/";
-		private $blog;
 		private $array = array();
 		
-		public function __construct($blog, $site){
-			$this->blog = $blog;
+		public function __construct($site){
 			$this->prefix = $site . str_replace(':blog_id', $this->blog, $this->prefix);
 		}
 		
@@ -333,16 +331,10 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCollections($params =  array(), $product_id = 0, $cache = false){
+		public function getCollections($params =  array(), $cache = false){
 			if (!$cache){
-				$params = url_encode_array($params);
-			
-				if ($product_id == 0){
-					$xmlObj = new parser($this->prefix . "custom_collections.xml?" . $params);
-				}else{
-					$xmlObj = new parser($this->prefix . "custom_collections.xml?product_id=" . $product_id . "&amp;" . $params);
-				}
-				
+				$params = url_encode_array($params);			
+				$xmlObj = new parser($this->prefix . "custom_collections.xml?" . $params);				
 				$this->array = organizeArray($xmlObj->resultArray(), 'custom-collection');
 			}
 			
@@ -350,14 +342,8 @@
 		}
 		
 		public function collectionCount($params = array(), $product_id = 0){
-			$params = url_encode_array($params);
-			
-			if ($product_id == 0){
-				$xmlObj = new parser($this->prefix . "custom_collections/count.xml?" . $params);
-			}else{
-				$xmlObj = new parser($this->prefix . "custom_collections/count.xml?product_id" . $product_id . "&amp;" . $params);				
-			}
-			
+			$params = url_encode_array($params);			
+			$xmlObj = new parser($this->prefix . "custom_collections/count.xml?" . $params);		
 			return $xmlObj->resultArray();
 		}
 		
@@ -402,50 +388,35 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCollects($product_id = 0, $collection_id = 0, $cache = false){
-			if (!$cache){				
-				if ($product_id == 0 && $collection_id == 0){
-					$xmlObj = new parser($this->prefix . "collects.xml");
-				}				
-				else if ($product_id > 0 && $collection_id == 0){			
-					$xmlObj = new parser($this->prefix . "collects.xml?product_id=" . $product_id);
-				}
-				else if ($product_id == 0 && $collection_id > 0){
-					$xmlObj = new parser($this->prefix . "collects.xml?collection_id=" . $collection_id);
-				}
-
+		public function getCollects($params = array(), $cache = false){
+			if (!$cache){
+				$params = url_encode_array($params);
+				$xmlObj = new parser($this->prefix . "collects.xml?" . $params);
 				$this->array = organizeArray($xmlObj->resultArray(), 'collect');
 			}
 			
 			return $this->array['collect'];
 		}
 		
-		public function countCollects($product_id = 0, $collection_id = 0){
-			if ($product_id == 0 && $collection_id == 0){
-				$xmlObj = new parser($this->prefix . "collects.xml");
-			}				
-			else if ($product_id > 0 && $collection_id == 0){			
-				$xmlObj = new parser($this->prefix . "collects.xml?product_id=" . $product_id);
-			}
-			else if ($product_id == 0 && $collection_id > 0){
-				$xmlObj = new parser($this->prefix . "collects.xml?collection_id=" . $collection_id);
-			}
-		
+		public function countCollects($params = array()){
+			$params = url_encode_array($params);
+			$xmlObj = new parser($this->prefix . "collects.xml?" . $params);
 			return $xmlObj->resultArray();
 		}
 		
-		public function getCollect($id = 0, $product_id = 0, $collection_id = 0, $cache = false){
+		public function getCollect($id = 0, $params = array(), $cache = false){
 			$collect = array();
 			
 			if (!$cache){
+				$params = url_encode_array($params);
 				if ($id > 0){
-					$xmlObj = new parser($this->prefix . "collects/" . $id . ".xml");
+					$xmlObj = new parser($this->prefix . "collects/" . $id . ".xml?" . $params);
 					$temp = $xmlObj->resultArray();
 					$this->array['collect'][$id] = $temp;
 					$collect = $temp;
 				}else{
-					if ($product_id > 0 && $collection_id > 0){
-						$xmlObj = new parser($this->prefix . "/collects.xml?collection_id=" . $collection_id ."&product_id=" . $product_id);
+					if (isset($params['product_id']) && isset($params['collection_id'])){
+						$xmlObj = new parser($this->prefix . "/collects.xml?" . $params);
 						$temp = $xmlObj->resultArray();
 						
 						if (isset($temp['collect'][0])){
@@ -484,54 +455,34 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getComments($params = array(), $blog_id = 0, $article_id = 0, $cache = false){
+		public function getComments($params = array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-			
-				if ($article_id > 0 && $blog_id > 0){
-					$xmlObj = new parser($this->prefix . "comments.xml?article_id=" . $article_id . "&amp;blog_id=" . $blog_id . "&amp;" . $params);
-				}
-				else if ($article_id == 0 && $blog_id > 0){
-					$xmlObj = new parser($this->prefix . "comments.xml?blog_id=" . $blog_id . "&amp;" . $params);
-				}
-				else if ($article_id == 0 && $blog_id == 0){
-					$xmlObj = new parser($this->prefix . "comments.xml?" . $params);
-				}
-			
+				$xmlObj = new parser($this->prefix . "comments.xml?" . $params);			
 				$this->array = organizeArray($xmlObj->resultArray(), 'comment');
 			}			
 			
 			return $this->array['comment'];
 		}
 		
-		public function commentCount($params = array(), $blog_id = 0, $article_id = 0){
+		public function commentCount($params = array()){
 			$params = url_encode_array($params);
-			
-			if ($article_id > 0 && $blog_id > 0){
-				$this->xml = new parser($this->prefix . "comments/count.xml?article_id=" . $article_id . "&amp;blog_id=" . $blog_id . "&amp;" . $params);
-			}
-			else if ($article_id == 0 && $blog_id > 0){
-				$this->xml = new parser($this->prefix . "comments/count.xml?blog_id=" . $blog_id . "&amp;" . $params);
-			}
-			else if ($article_id == 0 && $blog_id == 0){
-				$this->xml = new parser($this->prefix . "comments/count.xml?" . $params);
-			}
-			
+			$this->xml = new parser($this->prefix . "comments/count.xml?" . $params);
 			return $xmlObj->resultArray();
 		}
 		
-		public function getComment($comment_id, $cache = false){
+		public function getComment($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "comments/". $comment_id . ".xml");
+				$xmlObj = new parser($this->prefix . "comments/". $id . ".xml");
 				$temp = $xmlObj->resultArray();
-				$this->array['comment'][$comment_id] = $temp;
+				$this->array['comment'][$id] = $temp;
 			}
 
-			if (!isset($this->array['comment'][$comment_id])){
+			if (!isset($this->array['comment'][$id])){
 				throw new Exception("Comment is not in cache. Set cache to false.");
 			}
 
-			return $this->array['comment'][$comment_id];
+			return $this->array['comment'][$id];
 		}
 		
 		public function createComment($fields){
@@ -663,7 +614,6 @@
 	class Fullfillment{
 		private $prefix = "/orders/:order_id/";
 		private $array = array();
-		private $order_id = 0;
 		
 		public function __construct($order_id, $site){
 			$this->prefix = $site . str_replace(':order_id', $order_id, $this->prefix);
@@ -680,29 +630,29 @@
 			return $this->array['fullfillment'];
 		}
 		
-		public function getFullfillmentCount($order_id, $params = array()){
+		public function getFullfillmentCount($params = array()){
 			$params = url_encode_array($params);
 			$this->xml = new parser($this->prefix . "fullfillments/count.xml?" . $params);
 			return $this->xml->resultArray();
 		}
 		
-		public function getFullfillment($order_id, $fullfillment_id, $cache = false){
+		public function getFullfillment($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "fullfillments/" . $fullfillment_id . ".xml");
+				$xmlObj = new parser($this->prefix . "fullfillments/" . $id . ".xml");
 				$temp = $xmlObj->resultArray();
-				$this->array['fullfillment'][$fullfillment_id] = $temp;
+				$this->array['fullfillment'][$id] = $temp;
 			}
 			
-			if (!isset($this->array['fullfillment'][$fullfillment_id])){
+			if (!isset($this->array['fullfillment'][$id])){
 				throw new Exception("Fullfillment not in cache. Set cache to false.");
 			}
 			
-			return $this->array['fullfillent'][$fullfillment_id];
+			return $this->array['fullfillent'][$id];
 		}
 		
 		public function createFullfillment($fields){
 			$fields = array('fullfillment' => $fields);
-			return sendToAPI($this->prefix . "fullfillments/" . $id . ".xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "fullfillments.xml", 'POST', CREATED, $fields);
 		}
 		
 		public function fullfillItems($id, $fields){
@@ -712,7 +662,7 @@
 		
 		public function modifyFullfillment($id, $fields){
 			$fields = array('article' => $fields);
-			return sendToAPI($this->prefix . $id . "/fullfillments/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "fullfillments/" . $id . ".xml", 'PUT', SUCCESS, $fields);
 		}
 		
 		public function __destruct(){
@@ -759,18 +709,18 @@
 			return $this->array['metafield'][$metafield_id];
 		}
 		
-		public function newMetafield($product = true, $fields){
+		public function newMetafield($fields){
 			$fields = array('metafield' => $fields);
-			return ($product) ? sendToAPI($this->prefix . "products/" . $id . "/metafields.xml", 'POST', CREATED, $fields) : sendToAPI($this->prefix . "metafields.xml", 'POST', CREATED, $fields);
+			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields.xml", 'POST', CREATED, $fields) : sendToAPI($this->prefix . "metafields.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function modifyMetafield($product = true, $id, $fields){
+		public function modifyMetafield($id, $fields){
 			$fields = array('metafield' => $fields);
-			return ($product) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $id . ".xml", 'PUT', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . ".xml", 'PUT', SUCCESS);
+			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $id . ".xml", 'PUT', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . ".xml", 'PUT', SUCCESS);
 		}
 		
-		public function removeMetafield($product = true, $id){
-			return ($product) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $id . ".xml", 'DELETE', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function removeMetafield($id){
+			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $id . ".xml", 'DELETE', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . ".xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -956,28 +906,28 @@
 	}
 	
 	class ProductImage{
-		private $prefix = "/products/";
+		private $prefix = "/products/:product_id/";
 		private $array;
 		
-		public function __construct($site){
-			$this->prefix = $site . $this->prefix;
+		public function __construct($product_id, $site){
+			$this->prefix = $site . str_replace(':product_id', $product_id, $this->prefix);
 		}
 		
-		public function getImages($id, $cache = false){
+		public function getImages($cache = false){
 			if (!$cache){
-				$xmlObj =  new parser($this->prefix . $id . "/images.xml");
+				$xmlObj =  new parser($this->prefix . "images.xml");
 				$this->array = organizeArray($xmlObj->resultArray(), 'image');
 			}			
 			return $this->array['image'];
 		}
 		
-		public function createImage($id, $fields){
+		public function createImage($fields){
 			$fields = array('image' => $fields);
-			return sendToAPI($this->prefix . $id . "/images.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "images.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function removeImage(){
-			
+		public function removeImage($id){
+			return sendToAPI($this->prefix . "images/" . $id . ".xml");
 		}
 		
 		public function __destruct(){
@@ -986,48 +936,49 @@
 	}
 	
 	class ProductVariant{
-		private $prefix = "/products/";
+		private $prefix = "/products/:product_id/";
 		private $array = array();
 		
-		public function __construct($site){
-			$this->prefix = $site . $this->prefix;
+		public function __construct($product_id, $site){
+			$this->prefix = $site . str_replace(':product_id', $product_id, $this->prefix);
 		}
 		
-		public function getVariants($product_id, $cache = false){
+		public function getVariants($cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . $product_id . "/variants.xml");
+				$xmlObj = new parser($this->prefix . "/variants.xml");
 				$this->array = organizeArray($xmlObj->resultArray(), 'variant');
 			}			
 			return $this->array['variant'];
 		}
 		
-		public function variantCount($product_id){
-			$xmlObj = new parser($this->prefix . $product_id . "/variants/count.xml");
+		public function variantCount(){
+			$xmlObj = new parser($this->prefix . $this->product_id . "/variants/count.xml");
 			return $xmlObj->resultArray();
 		}
 		
-		public function getVariant($product_id, $variant_id, $cache = false){
+		public function getVariant($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . $product_id . "/variants/" . $variant_id . ".xml");
-				$this->array['variant'][$variant_id] = $xmlObj->resultArray();
+				$xmlObj = new parser($this->prefix . $this->product_id . "/variants/" . $id . ".xml");
+				$this->array['variant'][$id] = $xmlObj->resultArray();
 			}
 			
-			if (!isset($this->array['variant'][$variant_id])){
+			if (!isset($this->array['variant'][$id])){
 				throw new Exception("Variant not in cache. Change cache to false.");
 			}
 		}
 		
-		public function createVariant($id, $params){
+		public function createVariant($fields){
 			$fields = array('variant' => $fields);
 			return sendToAPI($this->prefix . "variants.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function modifyVariant(){
-			
+		public function modifyVariant($id, $fields){
+			$fields = array('variant' => $fields);
+			return sendToAPI($this->prefix . "variants/" . $id . ".xml", 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeVariant(){
-			
+		public function removeVariant($id){
+			return sendToAPI($this->prefix . "variants/" . $id . "xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -1036,35 +987,37 @@
 	}
 	
 	class Province{
-		private $prefix = "/countries/";
+		private $prefix = "/countries/:country_id/";
 		private $array = array();
 		
-		public function __construct($site){
-			$this->prefix = $site . $this->prefix;
+		
+		public function __construct($country_id, $site){
+			$this->prefix = $site . str_replace(':country_id', $country_id, $this->prefix);
 		}
 		
-		public function getProvinces($country){
-			$xmlObj = new parser($this->prefix . $country . "/provinces.xml");
+		public function getProvinces(){
+			$xmlObj = new parser($this->prefix . "provinces.xml");
 			$this->array = organizeArray($xmlObj->resultArray(), 'pronvince');
 			return $this->array['province'];
 		}
 		
-		public function provinceCount($country){
-			$xmlObj = new parser($this->prefix . $country . "/provinces/count.xml");
+		public function provinceCount(){
+			$xmlObj = new parser($this->prefix . "provinces/count.xml");
 			return $xmlObj->resultArray();
 		}
 		
-		public function getProvince($country, $province, $cache = false){
+		public function getProvince($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . $country . "/provinces/" . $province . ".xml");
+				$xmlObj = new parser($this->prefix . "provinces/" . $id . ".xml");
 				$this->array['province'][$province] = $xmlObj->resultArray();
 			}
 			
 			return $this->array['province'][$province];
 		}
 		
-		public function modifyProvince(){
-			
+		public function modifyProvince($id, $fields){
+			$fields = array('province' => $fields);
+			return sendToAPI($this->prefix . "provinces/" . $id . ".xml", 'PUT', SUCCESS, $fields);
 		}
 		
 		public function __destruct(){
@@ -1112,12 +1065,13 @@
 			return sendToAPI($this->prefix . "redirects.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function modifyRedirect(){
-			
+		public function modifyRedirect($id, $fields){
+			$fields = array('redirect' => $fields);
+			return sendToAPI($this->prefix . "redirects/" . $id . ".xml", 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeRedirect(){
-			
+		public function removeRedirect($id){
+			return sendToAPI($this->prefix . "redirects/" . $id . ".xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -1148,28 +1102,18 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCollections($params =  array(), $product_id = 0, $cache = false){
+		public function getCollections($params =  array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				if ($product_id == 0){
-					$xmlObj = new parser($this->prefix . "smart_collections.xml?" . $params);
-				}else{
-					$xmlObj = new parser($this->prefix . "smart_collections.xml?product_id=" . $product_id . "&amp;" . $params);
-				}
+				$xmlObj = new parser($this->prefix . "smart_collections.xml?" . $params);				
 				$this->array = organizeArray($xmlObj->resultArray(), 'smart-collection');
 			}
 			return $this->array['smart-collection'];
 		}
 		
-		public function collectionCount($params = array(), $product_id = 0){
-			$params = url_encode_array($params);
-			
-			if ($product_id == 0){
-				$xmlObj = new parser($this->prefix . "smart_collections/count.xml?" . $params);
-			}else{
-				$xmlObj = new parser($this->prefix . "smart_collections/count.xml?product_id" . $product_id . "&amp;" . $params);				
-			}
-			
+		public function collectionCount($params = array()){
+			$params = url_encode_array($params);			
+			$xmlObj = new parser($this->prefix . "smart_collections/count.xml?" . $params);			
 			return $xmlObj->resultArray();
 		}
 		
@@ -1192,12 +1136,14 @@
 			return sendToAPI($this->prefix . "smart_collections.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function modifyCollection($id){
+		public function modifyCollection($id, $fields){
+			$fields = array('smart-collection' => $fields);
+			return sendToAPI($this->prefix . "smart_collections/" . $id . ".xml", 'PUT', SUCCESS, $fields);
 			
 		}
 		
 		public function deleteCollection($id){
-			
+			return sendToAPI($this->prefix . "smart_collections/" . $id . ".xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -1206,16 +1152,16 @@
 	}
 	
 	class Transaction{
-		private $prefix = "/orders/";
+		private $prefix = "/orders/:order_id/";
 		private $array = array();
 		
-		public function __construct($site){
-			$this->prefix = $site . $this->prefix;
+		public function __construct($order_id, $site){
+			$this->prefix = $site . str_replace(':order_id', $order_id, $this->prefix);
 		}
 		
-		public function getTransactions($id, $cache = false){
+		public function getTransactions($cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . $id . "transactions.xml");
+				$xmlObj = new parser($this->prefix . "transactions.xml");
 				$this->array = organizeArray($xmlObj->resultArray(), 'transaction');
 			}
 			
@@ -1223,20 +1169,20 @@
 		}
 		
 		public function transactionCount($id){
-			$xmlObj = new parser($this->prefix . $id . "transactions/count.xml");
+			$xmlObj = new parser($this->prefix . "transactions/count.xml");
 			return $xmlObj->resultArray();
 		}
 		
-		public function getTransaction($order_id, $transaction_id, $cache = false){
+		public function getTransaction($id, $cache = false){
 			if (!$cache){
-				$xmlObj =  new parser($this->prefix . $id ."/transactions/" . $transaction_id . ".xml");
-				$this->array['transaction'][$transaction_id] = $xmlObj->resultArray();
+				$xmlObj =  new parser($this->prefix . "transactions/" . $id . ".xml");
+				$this->array['transaction'][$id] = $xmlObj->resultArray();
 			}
 			
 			return $this->array['transaction'][$transaction_id];
 		}
 		
-		public function createTransaction(){
+		public function createTransaction($fields){
 			$fields = array('transaction' => $fields);
 			return sendToAPI($this->prefix . "transactions.xml", 'POST', CREATED, $fields);
 		}
@@ -1284,12 +1230,13 @@
 			return sendToAPI($this->prefix . "webhooks.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function modifyHook(){
-			
+		public function modifyHook($id, $fields){
+			$fields = array('webhook' => $fields);
+			return sendToAPI($this->prefix . "webhooks/" . $id . ".xml", 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeHook(){
-			
+		public function removeHook($id){
+			return sendToAPI($this->prefix . "webhooks/". $id . ".xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
