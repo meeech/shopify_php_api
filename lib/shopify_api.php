@@ -2,8 +2,8 @@
 /*
 	Shopify PHP API
 	Created: May 4th, 2010
-	Modified: May 9th, 2010
-	Version: 1.20100509
+	Modified: May 10th, 2010
+	Version: 1.20100510
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -934,7 +934,8 @@
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
-			$this->shop = sendToAPI($this->prefix . "shop" . FORMAT . "?");
+			$this->shop = sendToAPI($this->prefix . "shop" . FORMAT);
+			$this->shop = $this->shop['shop'];
 		}
 		
 		public function __destruct(){
@@ -1268,9 +1269,23 @@
 		}
 		
 		public function loadString($data){
-			$xml = simplexml_load_string($data);
 			$array = array();
-			$this->recurseXML($xml, $array);
+				
+			if (FORMAT == ".xml"){
+				$xml = simplexml_load_string($data);
+				$this->recurseXML($xml, $array);
+			}
+			else if (FORMAT == ".json"){
+				if (!function_exists('json_decode')) die("json library not installed. Either change format to .xml or upgrade your version of PHP");
+				$array = json_decode($data, true);
+				foreach($array as $k => $v){
+					if (substr($k, strlen($k) - 1) == "s"){
+						$new = substr($k, 0, strlen($k) - 1);
+						$array[$new] = $array[$k];
+						unset($array[$k]);
+					}
+				}
+			}
 			return $array;
 		}
 		
