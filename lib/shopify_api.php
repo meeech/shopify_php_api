@@ -689,6 +689,7 @@
 		
 		public function get($id = 0, $cache = false, $params = array()){
 			if ($id == 0){
+				$params = url_encode_array($params);
 				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "pages" . FORMAT . "?" . $params), 'page');
 				return $this->array['page'];
 			}else{
@@ -735,7 +736,8 @@
 		
 		public function get($params = array(), $id = 0, $collection_id = 0, $cache = false){
 			if ($id == 0){
-				if (!$cache){				
+				if (!$cache){
+					$params = url_encode_array($params);
 					$xmlObj = ($collection_id > 0) ? sendToAPI($this->prefix . "products.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products" . FORMAT . "?" . $params);
 					$this->array = organizeArray($xmlObj, 'product');
 				}			
@@ -751,6 +753,7 @@
 		}
 		
 		public function count($params = array(), $collection_id = 0){
+			$params = url_encode_array($params);
 			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count" . FORMAT . "?" . $params);
 		}
 				
@@ -942,7 +945,6 @@
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
 			$this->shop = sendToAPI($this->prefix . "shop" . FORMAT);
-			$this->shop = $this->shop['shop'];
 		}
 		
 		public function __destruct(){
