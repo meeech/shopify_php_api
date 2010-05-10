@@ -2,12 +2,10 @@
 /*
 	Shopify PHP API
 	Created: May 4th, 2010
-	Modified: May 7th, 2010
-	Version: 1.20100507
+	Modified: May 9th, 2010
+	Version: 1.20100509
 */
 	//namespace ShopifyAPI;
-	ini_set('display_errors', 1); 
-	error_reporting(E_ALL);
 	
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -18,14 +16,17 @@
 	function url_encode_array($params){
 		$string = '';
 		if (sizeof($params) > 0){
-			foreach($params as $k => $v){
-				$string .= $k.'='.$v.'&amp;';
-			}
+			foreach($params as $k => $v) if (!is_array($v)) $string .= $k.'='.$v.'&';
 			$string = substr($string, 0, strlen($string) - 1);
 		}
 		return $string;
 	}
 	
+	/*
+		organizeArray applies some changes to the array that is generated from returned XML
+		This is done so that traversing the result is easier to manipulate by setting the index
+		of returned data to the actual ID of the record
+	*/
 	function organizeArray($array, $type){
 		/* no organizing needed */
 		if (!isset($array[$type][0])){
@@ -45,29 +46,29 @@
 	}
 	
 	function arrayToXML($array, $xml = ''){
-		if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+		if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>';
 		foreach($array as $k => $v){
 			if (is_array($v)){
-				$xml .= '<' . $k . '>' . "\n";
+				$xml .= '<' . $k . '>';
 				$xml = arrayToXML($v, $xml);
-				$xml .= '</' . $k . '>' . "\n";
+				$xml .= '</' . $k . '>';
 			}else{
-				$xml .= '<' . $k . '>' . $v . '</' . $k . '>' . "\n";
+				$xml .= '<' . $k . '>' . $v . '</' . $k . '>';
 			}
 		}	
 		return $xml;
 	}
 	
-	function sendToAPI($url, $request, $successCode, $xml = array()){
+	function sendToAPI($url, $request = 'GET', $successCode = SUCCESS, $xml = array()){
 		$xml = arrayToXML($xml);
 		$ch = new miniCURL();
 		$data = $ch->send($url, $request, $xml);
+
 		if ($data[0] == $successCode){
-			$xml = new parser();
-			return $xml->loadString($data[1]);
+			return $ch->loadString($data[1]);
 		}
 					
-		return false;
+		return $data[0]; //returns the HTTP Code (200, 201 etc) if the expected $successCode was not met
 	}
 
 	class ApplicationCharge{
@@ -79,11 +80,7 @@
 		}
 		
 		public function getCharges($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . ".xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'record');
-			}
-			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . ".xml"), 'record');
 			return $this->array['record'];
 		}
 		
@@ -110,11 +107,7 @@
 		}
 		
 		public function getCharges($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . ".xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'recurring-application-charge');
-			}
-			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . ".xml"), 'recurring-application-charge');		
 			return $this->array['recurring-application-charge'];
 		}
 		
@@ -141,15 +134,14 @@
 		private $prefix = "/blogs/:blog_id/";
 		private $array = array();
 		
-		public function __construct($site){
-			$this->prefix = $site . str_replace(':blog_id', $this->blog, $this->prefix);
+		public function __construct($blog, $site){
+			$this->prefix = $site . str_replace(':blog_id', $blog, $this->prefix);
 		}
 		
 		public function getArticles($cache = false, $params = array()){
 			if (!$cache){
-				$params = url_encode_array($params);				
-				$xmlObj = new parser($this->prefix . 'articles.xml?' . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'article');
+				$params = url_encode_array($params);
+				$this->array = organizeArray(sendToAPI($this->prefix . 'articles.xml?' . $params), 'article');
 			}
 			
 			return $this->array['article'];
@@ -157,21 +149,15 @@
 		
 		public function getCount($params = array()){
 			$params = url_encode_array($params);
-			$xmlObj = new parser($this->prefix . 'articles/count.xml?' . $params);
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . 'articles/count.xml?' . $params);
 		}
 		
 		public function getArticle($id, $cache = false){			
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . 'articles/' . $id . '.xml');
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . 'articles/' . $id . '.xml');
 				$this->array['article'][$id] = $temp;
-			}
-			
-			if (!isset($this->array['article'][$id])){
-				throw new Exception("Article is not in cache. Set cache to false.");
-			}
-			
+			}			
+			if (!isset($this->array['article'][$id])) throw new Exception("Article is not in cache. Set cache to false.");
 			return $this->array['article'][$id];
 		}
 		
@@ -203,39 +189,25 @@
 		}
 			
 		public function getAssets($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix);
-				$this->array = organizeArray($xmlObj->resultArray(), 'asset');
-			}
-			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix), 'asset');		
 			return $this->array['asset'];
 		}
 		
 		public function getAsset($key, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . '?asset[key]=' . $key);
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . '?asset[key]=' . $key);
 				$this->array['asset'][$key] = $temp;
 			}
-			
-			if (!isset($this->array['asset'][$key])){
-				throw new Exception("Asset does not exist in cache. Change cache to false.");
-			}
-			
+			if (!isset($this->array['asset'][$key])) throw new Exception("Asset does not exist in cache. Change cache to false.");		
 			return $this->array['asset'][$key];
 		}
 		
 		public function getThemeImage($key, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . '?asset[key]=' . $key);
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . '?asset[key]=' . $key);
 				$this->array['asset'][$key] = $temp;
 			}
-			
-			if (!isset($this->array['asset'][$key])){
-				throw new Exception("Asset does not exist in cache. Change cache to false.");
-			}
-			
+			if (!isset($this->array['asset'][$key])) throw new Exception("Asset does not exist in cache. Change cache to false.");		
 			return $this->array['asset'][$key];
 		}
 		
@@ -277,30 +249,20 @@
 		}
 		
 		public function getBlogs($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . ".xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'blog');
-			}
-			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . ".xml"), 'blog');
 			return $this->array['blog'];
 		}
 		
 		public function blogCount(){
-			$xmlObj = new parser($this->prefix . "/count.xml");
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "/count.xml");
 		}
 		
 		public function getBlog($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "/" . $id . ".xml");
 				$this->array['blog'][$id] = $temp;
 			}
-			
-			if (!isset($this->array['blog'][$id])){
-				throw new Exception("Blog doesn't exist in cache. Turn cache to false.");
-			}
-			
+			if (!isset($this->array['blog'][$id])) throw new Exception("Blog doesn't exist in cache. Turn cache to false.");		
 			return $this->array['blog'][$id];
 		}
 		
@@ -334,8 +296,7 @@
 		public function getCollections($params =  array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);			
-				$xmlObj = new parser($this->prefix . "custom_collections.xml?" . $params);				
-				$this->array = organizeArray($xmlObj->resultArray(), 'custom-collection');
+				$this->array = organizeArray(sendToAPI($this->prefix . "custom_collections.xml?" . $params), 'custom-collection');
 			}
 			
 			return $this->array['custom-collection'];
@@ -343,21 +304,15 @@
 		
 		public function collectionCount($params = array(), $product_id = 0){
 			$params = url_encode_array($params);			
-			$xmlObj = new parser($this->prefix . "custom_collections/count.xml?" . $params);		
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "custom_collections/count.xml?" . $params);
 		}
 		
 		public function getCollection($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "/custom_collections/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "/custom_collections/" . $id . ".xml");
 				$this->array['custom-collection'][$id] = $temp;				
 			}
-			
-			if (!isset($this->array['custom-collection'][$id])){
-				throw new Exception("Collection not in the cache. Set cache to false.");
-			}
-			
+			if (!isset($this->array['custom-collection'][$id])) throw new Exception("Collection not in the cache. Set cache to false.");			
 			return $this->array['custom-collection'][$id];
 		}
 		
@@ -391,8 +346,7 @@
 		public function getCollects($params = array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				$xmlObj = new parser($this->prefix . "collects.xml?" . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'collect');
+				$this->array = organizeArray(sendToAPI($this->prefix . "collects.xml?" . $params), 'collect');
 			}
 			
 			return $this->array['collect'];
@@ -400,8 +354,7 @@
 		
 		public function countCollects($params = array()){
 			$params = url_encode_array($params);
-			$xmlObj = new parser($this->prefix . "collects.xml?" . $params);
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "collects.xml?" . $params);
 		}
 		
 		public function getCollect($id = 0, $params = array(), $cache = false){
@@ -410,14 +363,12 @@
 			if (!$cache){
 				$params = url_encode_array($params);
 				if ($id > 0){
-					$xmlObj = new parser($this->prefix . "collects/" . $id . ".xml?" . $params);
-					$temp = $xmlObj->resultArray();
+					$temp = sendToAPI($this->prefix . "collects/" . $id . ".xml?" . $params);
 					$this->array['collect'][$id] = $temp;
 					$collect = $temp;
 				}else{
 					if (isset($params['product_id']) && isset($params['collection_id'])){
-						$xmlObj = new parser($this->prefix . "/collects.xml?" . $params);
-						$temp = $xmlObj->resultArray();
+						$temp = sendToAPI($this->prefix . "/collects.xml?" . $params);
 						
 						if (isset($temp['collect'][0])){
 							$id = $temp['collect'][0]['id'];
@@ -458,8 +409,7 @@
 		public function getComments($params = array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				$xmlObj = new parser($this->prefix . "comments.xml?" . $params);			
-				$this->array = organizeArray($xmlObj->resultArray(), 'comment');
+				$this->array = organizeArray(sendToAPI($this->prefix . "comments.xml?" . $params), 'comment');
 			}			
 			
 			return $this->array['comment'];
@@ -467,21 +417,15 @@
 		
 		public function commentCount($params = array()){
 			$params = url_encode_array($params);
-			$this->xml = new parser($this->prefix . "comments/count.xml?" . $params);
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "comments/count.xml?" . $params);
 		}
 		
 		public function getComment($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "comments/". $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "comments/" . $id . ".xml");
 				$this->array['comment'][$id] = $temp;
 			}
-
-			if (!isset($this->array['comment'][$id])){
-				throw new Exception("Comment is not in cache. Set cache to false.");
-			}
-
+			if (!isset($this->array['comment'][$id])) throw new Exception("Comment is not in cache. Set cache to false.");
 			return $this->array['comment'][$id];
 		}
 		
@@ -517,30 +461,20 @@
 		}
 		
 		public function getCountries($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . "countries.xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'country');
-			}
-
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "countries.xml"), 'country');
 			return $this->array['country'];
 		}
 		
 		public function countryCount(){
-			$xmlObj = new parser($this->prefix . "countries/count.xml");
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "countries/count.xml");
 		}
 		
 		public function getCountry($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "countries/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "countries/" . $id . ".xml");
 				$this->array['country'][$id] = $temp;
-			}
-			
-			if (!isset($this->array['country'][$id])){
-				throw new Exception("Country not in cache. Set cache to false.");
-			}
-			
+			}			
+			if (!isset($this->array['country'][$id])) throw new Exception("Country not in cache. Set cache to false.");		
 			return $this->array['country'][$id];
 		}
 		
@@ -573,36 +507,28 @@
 		
 		public function getEvents($params = array()){
 			$params = url_encode_array($params);
-			$xmlObj = new parser($this->prefix . "events.xml?" . $params);
-			$this->array = organizrArray($xmlObj->resultArray(), 'event');			
+			$this->array = organizrArray(sendToAPI($this->prefix . "events.xml?" . $params), 'event');			
 			return $this->array['event'];
 		}
 		
 		public function getOrderEvents($id, $params = array()){
 			$params = url_encode_array($params);
-			$xmlObj = new parser($this->prefix . "orders/" . $id . "/events.xml?" . $params);
-			$this->array = organizrArray($xmlObj->resultArray(), 'event');			
+			$this->array = organizeArray(sendToAPI($this->prefix . "orders/" . $id . "/events.xml?" . $params), 'event');			
 			return $this->array['event'];
 		}
 		
 		public function getProductEvents($id, $params = array()){
 			$params = url_encode_array($params);			
-			$xmlObj = new parser($this->prefix . "products/" . $id . "/events.xml?" . $params);
-			$this->array = organizrArray($xmlObj->resultArray(), 'event');			
+			$this->array = organizeArray(sendToAPI($this->prefix . "products/" . $id . "/events.xml?" . $params), 'event');			
 			return $this->array['event'];
 		}
 		
 		public function getEvent($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "events/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "events/" . $id . ".xml");
 				$this->array['event'][$id] = $temp;
-			}
-			
-			if (!isset($this->array['event'][$id])){
-				throw new Exception("Event not found in the cache. Set cache to false.");
-			}
-
+			}			
+			if (!isset($this->array['event'][$id])) throw new Exception("Event not found in the cache. Set cache to false.");
 			return $this->array['event'][$id];
 		}
 		
@@ -617,36 +543,27 @@
 		
 		public function __construct($order_id, $site){
 			$this->prefix = $site . str_replace(':order_id', $order_id, $this->prefix);
-			$this->order_id = $order_id;
 		}
 	
 		public function getFullfillments($params = array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				$xmlObj = new parser($this->prefix . "fullfillments.xml?" . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'fullfillment');
-			}
-			
+				$this->array = organizeArray(sendToAPI($this->prefix . "fullfillments.xml?" . $params), 'fullfillment');
+			}			
 			return $this->array['fullfillment'];
 		}
 		
 		public function getFullfillmentCount($params = array()){
 			$params = url_encode_array($params);
-			$this->xml = new parser($this->prefix . "fullfillments/count.xml?" . $params);
-			return $this->xml->resultArray();
+			return sendToAPI($this->prefix . "fullfillments/count.xml?" . $params);
 		}
 		
 		public function getFullfillment($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "fullfillments/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "fullfillments/" . $id . ".xml");
 				$this->array['fullfillment'][$id] = $temp;
-			}
-			
-			if (!isset($this->array['fullfillment'][$id])){
-				throw new Exception("Fullfillment not in cache. Set cache to false.");
-			}
-			
+			}			
+			if (!isset($this->array['fullfillment'][$id])) throw new Exception("Fullfillment not in cache. Set cache to false.");		
 			return $this->array['fullfillent'][$id];
 		}
 		
@@ -683,13 +600,8 @@
 		public function getMetafields($params = array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				if ($product_id > 0){
-					$xmlObj = new parser($this->prefix . "metafields.xml?" . $params);
-				}else{
-					$xmlObj = new parser($this->prefix . "products/" . $this->product_id . "/metafields.xml?" . $params);
-				}
-				
-				$this->array = organizeArray($xmlObj->resultArray(), 'metafield');
+				$xmlObj = ($product_id > 0) ? sendToAPI($this->prefix . "metafields.xml?" . $params) : sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields.xml?" . $params);				
+				$this->array = organizeArray($xmlObj, 'metafield');
 			}
 			
 			return $this->array['metafield'];
@@ -697,15 +609,10 @@
 		
 		public function getMetafield($metafield_id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "products/" . $this->product_id . "/metafields/" . $metafield_id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $metafield_id . ".xml");
 				$this->array['metafield'][$metafield_id] = $temp;
-			}
-			
-			if (!isset($this->array['metafield'][$metafield_id])){
-				throw new Exception("Metafield not found in cache. Set cache to false.");
-			}
-			
+			}			
+			if (!isset($this->array['metafield'][$metafield_id])) throw new Exception("Metafield not found in cache. Set cache to false.");
 			return $this->array['metafield'][$metafield_id];
 		}
 		
@@ -739,8 +646,7 @@
 		public function getOrders($params = array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				$xmlObj = new parser($this->prefix . "orders.xml?" . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'order');
+				$this->array = organizeArray(sendToAPI($this->prefix . "orders.xml?" . $params), 'order');
 			}
 			
 			return $this->array['order'];
@@ -748,22 +654,16 @@
 		
 		public function getOrder($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "orders/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = semdToAPI($this->prefix . "orders/" . $id . ".xml");
 				$this->array['order'][$id] = $temp;
 			}
-			
-			if (!isset($this->array['order'][$id])){
-				throw new Exception("Order not in cache. Set cache to false.");
-			}
-			
+			if (!isset($this->array['order'][$id])) throw new Exception("Order not in cache. Set cache to false.");			
 			return $this->array['order'][$id];
 		}
 		
 		public function countOrders($params = array()){
 			$params = url_encode_array($params);
-			$xmlObj = new parser($this->prefix . "orders/count.xml?" . $params);
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "orders/count.xml?" . $params);
 		}
 		
 		public function openOrder($id){
@@ -798,29 +698,20 @@
 		}
 		
 		public function getPages($cache = false, $params = array()){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . "pages.xml?" . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'page');
-			}			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "pages.xml?" . $params), 'page');
 			return $this->array['page'];
 		}
 		
 		public function pageCount($params = array()){
-			$xmlObj = new parser($this->prefix . "pages/count.xml?" . $params);
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "pages/count.xml?" . $params);
 		}
 		
 		public function getPage($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "pages/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "pages/" . $id . ".xml");
 				$this->array['page'][$id] = $temp;
-			}
-			
-			if (!isset($this->array['page'][$id])){
-				throw new Exception("Page not in cache. Set cache to false.");
-			}
-			
+			}			
+			if (!isset($this->array['page'][$id])) throw new Exception("Page not in cache. Set cache to false.");
 			return $this->array['page'][$id];
 		}
 		
@@ -852,37 +743,23 @@
 		}
 		
 		public function getProducts($params = array(), $collection_id = 0, $cache = false){
-			if (!$cache){
-				if ($collection_id > 0){
-					$xmlObj = new parser($this->prefix . "products.xml?collection_id=" . $collection_id . "&" . $params);
-				}else{
-					$xmlObj = new parser($this->prefix . "products.xml?" . $params);
-				}
-				$this->array = organizeArray($xmlObj->resultArray(), 'product');
+			if (!$cache){				
+				$xmlObj = ($collection_id > 0) ? sendToAPI($this->prefix . "products.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products.xml?" . $params);
+				$this->array = organizeArray($xmlObj, 'product');
 			}			
 			return $this->array['product'];
 		}
 		
 		public function productCount($params = array(), $collection_id = 0){
-			if ($collection_id == 0){
-				$xmlObj = new parser($this->prefix . "products/count.xml?" . $params);
-			}else{
-				$xmlObj = new parser($this->prefix . "products/count.xml?collection_id=" . $collection_id . "&" . $params);
-			}
-			return $xmlObj->resultArray();
+			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count.xml?" . $params);
 		}
 		
 		public function getProduct($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "products/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "products/" . $id . ".xml");
 				$this->array['product'][$id] = $temp;
 			}
-			
-			if (!isset($this->array['product'][$id])){
-				throw new Exception("Product not in cache. Set cache to false.");
-			}
-			
+			if (!isset($this->array['product'][$id])) throw new Exception("Product not in cache. Set cache to false.");		
 			return $this->array['product'][$id];
 		}
 			
@@ -914,10 +791,7 @@
 		}
 		
 		public function getImages($cache = false){
-			if (!$cache){
-				$xmlObj =  new parser($this->prefix . "images.xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'image');
-			}			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "images.xml"), 'image');
 			return $this->array['image'];
 		}
 		
@@ -927,7 +801,7 @@
 		}
 		
 		public function removeImage($id){
-			return sendToAPI($this->prefix . "images/" . $id . ".xml");
+			return sendToAPI($this->prefix . "images/". $id . ".xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -944,27 +818,21 @@
 		}
 		
 		public function getVariants($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . "/variants.xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'variant');
-			}			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "/variants.xml"), 'variant');
 			return $this->array['variant'];
 		}
 		
 		public function variantCount(){
-			$xmlObj = new parser($this->prefix . $this->product_id . "/variants/count.xml");
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . $this->product_id . "/variants/count.xml");
 		}
 		
 		public function getVariant($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . $this->product_id . "/variants/" . $id . ".xml");
-				$this->array['variant'][$id] = $xmlObj->resultArray();
-			}
-			
-			if (!isset($this->array['variant'][$id])){
-				throw new Exception("Variant not in cache. Change cache to false.");
-			}
+				$temp = sendToAPI($this->prefix . $this->product_id . "/variants/" . $id . ".xml");
+				$this->array['variant'][$id] = $temp;
+			}			
+			if (!isset($this->array['variant'][$id])) throw new Exception("Variant not in cache. Change cache to false.");
+			return $this->array['variant'][$id];
 		}
 		
 		public function createVariant($fields){
@@ -996,23 +864,21 @@
 		}
 		
 		public function getProvinces(){
-			$xmlObj = new parser($this->prefix . "provinces.xml");
-			$this->array = organizeArray($xmlObj->resultArray(), 'pronvince');
+			$this->array = organizeArray(sendToAPI($this->prefix . "provinces.xml"), 'pronvince');
 			return $this->array['province'];
 		}
 		
 		public function provinceCount(){
-			$xmlObj = new parser($this->prefix . "provinces/count.xml");
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "provinces/count.xml");
 		}
 		
 		public function getProvince($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "provinces/" . $id . ".xml");
-				$this->array['province'][$province] = $xmlObj->resultArray();
-			}
-			
-			return $this->array['province'][$province];
+				$temp = sendToAPI($this->prefix . "provinces/" . $id . ".xml");
+				$this->array['province'][$id] = $temp;
+			}			
+			if (!isset($this->array['province'][$id])) throw new Exception("Province not in cache. Set cache to false.");
+			return $this->array['province'][$id];
 		}
 		
 		public function modifyProvince($id, $fields){
@@ -1036,27 +902,21 @@
 		public function getRedirects($params = array(), $cache = false){			
 			if (!$cache){
 				$params = url_encode_array($params);
-				$xmlObj = new parser($this->prefix . "redirects.xml?" . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'redirect');
+				$this->array = organizeArray(sendToAPI($this->prefix . "redirects.xml?" . $params), 'redirect');
 			}		
 			return $this->array['redirect'];
 		}
 		
 		public function redirectCount($params){
-			$xmlObj = new parser($this->prefix . "redirects/count.xml?" . $params);
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "redirects/count.xml?" . $params);
 		}
 		
 		public function getRedirect($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "redirects/" . $id .".xml");
-				$this->array['redirect'][$id] = $xmlObj->resultArray();
-			}
-			
-			if (!isset($this->array['redirect'][$id])){
-				throw new Exception("Redirect not found in cache. Set cache to false.");
-			}
-			
+				$temp = sendToAPI($this->prefix . "redirects/" . $id .".xml");
+				$this->array['redirect'][$id] = $temp;
+			}			
+			if (!isset($this->array['redirect'][$id])) throw new Exception("Redirect not found in cache. Set cache to false.");
 			return $this->array['redirect'][$id];
 		}
 		
@@ -1085,8 +945,7 @@
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
-			$xmlObj = new parser($this->prefix . "shop.xml");
-			$this->shop = $xmlObj->resultArray();
+			$this->shop = sendToAPI($this->prefix . "shop.xml");
 		}
 		
 		public function __destruct(){
@@ -1105,29 +964,22 @@
 		public function getCollections($params =  array(), $cache = false){
 			if (!$cache){
 				$params = url_encode_array($params);
-				$xmlObj = new parser($this->prefix . "smart_collections.xml?" . $params);				
-				$this->array = organizeArray($xmlObj->resultArray(), 'smart-collection');
+				$this->array = organizeArray(sendToAPI($this->prefix . "smart_collections.xml?" . $params), 'smart-collection');
 			}
 			return $this->array['smart-collection'];
 		}
 		
 		public function collectionCount($params = array()){
 			$params = url_encode_array($params);			
-			$xmlObj = new parser($this->prefix . "smart_collections/count.xml?" . $params);			
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "smart_collections/count.xml?" . $params);			
 		}
 		
 		public function getCollection($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "/smart_collections/" . $id . ".xml");
-				$temp = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "/smart_collections/" . $id . ".xml");
 				$this->array['smart-collection'][$id] = $temp;				
-			}
-			
-			if (!isset($this->array['smart-collection'][$id])){
-				throw new Exception("Collection not in the cache. Set cache to false.");
-			}
-			
+			}			
+			if (!isset($this->array['smart-collection'][$id])) throw new Exception("Collection not in the cache. Set cache to false.");
 			return $this->array['smart-collection'][$id];
 		}
 		
@@ -1160,26 +1012,21 @@
 		}
 		
 		public function getTransactions($cache = false){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . "transactions.xml");
-				$this->array = organizeArray($xmlObj->resultArray(), 'transaction');
-			}
-			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "transactions.xml"), 'transaction');			
 			return $this->array['transaction'];
 		}
 		
 		public function transactionCount($id){
-			$xmlObj = new parser($this->prefix . "transactions/count.xml");
-			return $xmlObj->resultArray();
+			return sendToAPI($this->prefix . "transactions/count.xml");
 		}
 		
 		public function getTransaction($id, $cache = false){
 			if (!$cache){
-				$xmlObj =  new parser($this->prefix . "transactions/" . $id . ".xml");
-				$this->array['transaction'][$id] = $xmlObj->resultArray();
-			}
-			
-			return $this->array['transaction'][$transaction_id];
+				$temp = sendToAPI($this->prefix . "transactions/" . $id . ".xml");
+				$this->array['transaction'][$id] = $temp;
+			}			
+			if (!isset($this->array['transaction'][$id])) throw new Exception("Transaction not in cache. Set cache to false.");			
+			return $this->array['transaction'][$id];
 		}
 		
 		public function createTransaction($fields){
@@ -1201,11 +1048,7 @@
 		}
 		
 		public function getHooks($cache = false, $params = array()){
-			if (!$cache){
-				$xmlObj = new parser($this->prefix . "webhooks.xml?" . $params);
-				$this->array = organizeArray($xmlObj->resultArray(), 'webhook');
-			}
-			
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks.xml?" . $params), 'webhook');
 			return $this->array['webhok'];
 		}
 		
@@ -1216,12 +1059,10 @@
 		
 		public function getHook($id, $cache = false){
 			if (!$cache){
-				$xmlObj = new parser($this->prefix . "webhooks/" . $id . ".xml");
-				$this->array['webhook'][$id] = $xmlObj->resultArray();
+				$temp = sendToAPI($this->prefix . "webhooks/" . $id . ".xml");
+				$this->array['webhook'][$id] = $temp;
 			}
-			if (!isset($this->array['webhook'][$id])){
-				throw new Exception("Webhook not in cache. Set cache to false.");
-			}
+			if (!isset($this->array['webhook'][$id])) throw new Exception("Webhook not in cache. Set cache to false.");
 			return $this->array['webhook'][$id];
 		}
 		
@@ -1328,36 +1169,40 @@
 		*/	
 	}
 	
-	/*
-		The parser class is just a class that takes an XML document and turns it into a
-		php array that is used throughout the API.	
-	*/
-	
-	class parser{
+	class miniCURL{
 		
-		private $xml;
-		private $resultArray = array();
 		private $ch;
-				
-		public function __construct($file = ''){
-			if (isEmpty($file)){
-				$this->ch = new miniCURL();
-				$data = $this->ch->send($file);
-				if ($data[0] > 400){
-					throw new Exception("A " . $code . " error occured.");
-				}
-				$this->xml = simplexml_load_string($data[1]);
+		
+		public function send($url, $request = 'GET', $xml_payload = '', $headers = array('Accept-Encoding: gzip')){
+			$this->ch = curl_init($url);
+		
+			// _HEADER _RETURNTRANSFER -- Return output as string including HEADER information
+			$options = array(
+				CURLOPT_HEADER => 0,
+				CURLOPT_RETURNTRANSFER => 1,
+				CURLOPT_CUSTOMREQUEST => $request,
+//				CURLOPT_HTTPHEADER => $headers
+			);
+			
+			if ($request != "GET"){ 
+				$options[CURLOPT_POSTFIELDS] = $xml_payload; 
+				$options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
 			}
+			
+			curl_setopt_array($this->ch, $options);
+			curl_exec($this->ch);
+			$data = curl_multi_getcontent($this->ch);
+			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+			curl_close($this->ch);
+			
+			return array($code, $data);
 		}
 		
-		public function loadString($string){
-			$this->xml = simplexml_load_string($string);
-			return $this->resultArray();
-		}
-		
-		public function resultArray(){
-			$this->recurseXML($this->xml, $this->resultArray);
-			return $this->resultArray;						
+		public function loadString($data){
+			$xml = simplexml_load_string($data);
+			$array = array();
+			$this->recurseXML($xml, $array);
+			return $array;
 		}
 		
 		public function recurseXML($xml, &$array){ 
@@ -1391,41 +1236,6 @@
 	        if (!$executed && isEmpty($children->getName())){ 
 	            $array = (string)$xml; 
 	        } 
-		}
-		
-		public function __destruct(){
-			empty($this);
-		}
-	}
-	
-	class miniCURL{
-		
-		private $ch;
-		
-		public function send($url, $request = 'GET', $xml_payload = '', $headers = array('Accept-Encoding: gzip')){
-			$this->ch = curl_init($url);
-		
-			// _HEADER _RETURNTRANSFER -- Return output as string including HEADER information
-			$options = array(
-				CURLOPT_HEADER => 1,
-				CURLOPT_RETURNTRANSFER => 1,
-				CURLOPT_CUSTOMREQUEST => $request,
-//				CURLOPT_HTTPHEADER => $headers
-			);
-			
-			if ($request != "GET"){ 
-				$options[CURLOPT_HEADER] = 0;
-				$options[CURLOPT_POSTFIELDS] = $xml_payload; 
-				$options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
-			}
-			
-			curl_setopt_array($this->ch, $options);
-			curl_exec($this->ch);
-			$data = curl_multi_getcontent($this->ch);
-			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
-			curl_close($this->ch);
-			
-			return array($code, $data);
 		}
 		
 		public function __destruct(){
