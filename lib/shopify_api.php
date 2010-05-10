@@ -25,7 +25,14 @@
 		This is done so that traversing the result is easier to manipulate by setting the index
 		of returned data to the actual ID of the record
 	*/
-	function organizeArray($array, $type){
+	function organizeArray($array, $type){		
+		if (FORMAT == ".json"){
+			if (isset($array[$type . 's'])){
+				$array[$type] = $array[$type . 's'];
+				unset($array[$type . 's']);
+			}
+		}
+		
 		/* no organizing needed */
 		if (!isset($array[$type][0])){
 			$temp = $array[$type];
@@ -1278,13 +1285,7 @@
 			else if (FORMAT == ".json"){
 				if (!function_exists('json_decode')) die("json library not installed. Either change format to .xml or upgrade your version of PHP");
 				$array = json_decode($data, true);
-				foreach($array as $k => $v){
-					if (substr($k, strlen($k) - 1) == "s"){
-						$new = substr($k, 0, strlen($k) - 1);
-						$array[$new] = $array[$k];
-						unset($array[$k]);
-					}
-				}
+				if (isset($array['count'])) $array = $array['count'];				
 			}
 			return $array;
 		}
