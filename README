@@ -1,0 +1,11 @@
+To run the test:
+
+First you need to enable Web Sharing in your System Preferences.
+
+Once you have that going, drag and drop the shopify_php_api folder into
+
+Users/YOUR_USERNAME_/Sites/
+
+Open up shopify_php_api/test.php and update the USERNAME consant to your username.
+
+You can then access it by going to http://localhost/~YOUR_USERNAME/shopify_php_api/test/index.php

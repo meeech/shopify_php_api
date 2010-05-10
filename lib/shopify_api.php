@@ -5,8 +5,6 @@
 	Modified: May 9th, 2010
 	Version: 1.20100509
 */
-	//namespace ShopifyAPI;
-	
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
 		return (strlen(trim($string)) == 0);
@@ -63,11 +61,7 @@
 		$xml = arrayToXML($xml);
 		$ch = new miniCURL();
 		$data = $ch->send($url, $request, $xml);
-
-		if ($data[0] == $successCode){
-			return $ch->loadString($data[1]);
-		}
-					
+		if ($data[0] == $successCode) return $ch->loadString($data[1]);					
 		return $data[0]; //returns the HTTP Code (200, 201 etc) if the expected $successCode was not met
 	}
 
@@ -94,7 +88,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -126,7 +121,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}	
 
@@ -176,7 +172,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -236,7 +233,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}		
 	}
 	
@@ -281,7 +279,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -331,7 +330,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -394,7 +394,8 @@
 		}
 					
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -448,7 +449,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -493,7 +495,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -533,7 +536,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -583,7 +587,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -631,7 +636,9 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
+			unset($this->product_id);
 		}
 	}
 	
@@ -685,7 +692,8 @@
 		}
 			
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -730,7 +738,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -778,7 +787,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -805,7 +815,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -850,7 +861,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -887,7 +899,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -935,7 +948,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -949,7 +963,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->shop);
 		}
 	}
 	
@@ -999,7 +1014,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}		
 	}
 	
@@ -1035,7 +1051,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -1081,7 +1098,8 @@
 		}
 		
 		public function __destruct(){
-			empty($this);
+			unset($this->prefix);
+			unset($this->array);
 		}
 	}
 	
@@ -1135,7 +1153,14 @@
 		}
 			
 		public function __destruct(){
-			empty($this);
+			unset($this->api_key);
+			unset($this->secret);
+			unset($this->protocol);
+			unset($this->format);
+			unset($this->shop);
+			unset($this->url);
+			unset($this->token);
+			unset($this->name);
 		}
 		
 		/*
@@ -1239,7 +1264,7 @@
 		}
 		
 		public function __destruct(){
-			empty($this);			
+			empty($this->ch);			
 		}
 	}
 ?>
