@@ -9,3 +9,5 @@ Users/YOUR_USERNAME_/Sites/
 Open up shopify_php_api/test.php and update the USERNAME consant to your username.
 
 You can then access it by going to http://localhost/~YOUR_USERNAME/shopify_php_api/test/index.php
+
+You'll also need to set some values in lib/shopify_api_config.php if you wanna try *using* the API.
