@@ -66,10 +66,6 @@
 	
 	//if the Shopify connection is valid
 	if ($api->valid()){
-		//All objects need to be passed $api->site();
-		$article = new Article(597742, $api->site());
-		//$result = $article->createNewArticle(array('title' => 'Testing from the PHP API!', 'body' => 'Hey there! I posted this article from the API!'));
-		//print_r($article->getArticles());
-		print_r($article->getArticle(1619542));
+		print_r($api->blog->get());
 	}
 ?>

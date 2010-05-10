@@ -73,18 +73,18 @@
 			$this->prefix = $site .  $this->prefix;
 		}
 		
-		public function getCharges($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . ".xml"), 'record');
+		public function get($cache = false){
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . FORMAT), 'record');
 			return $this->array['record'];
 		}
 		
-		public function createCharge($fields){
+		public function create($fields){
 			$fields = array('application-charge' => $fields);
-			return sendToAPI($this->prefix . ".xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function activateCharge($id){
-			return sendToAPI($this->prefix . "/" . $id . "/activate.xml", 'PUT', SUCCESS);
+		public function activate($id){
+			return sendToAPI($this->prefix . "/" . $id . "/activate" . FORMAT, 'PUT', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -101,23 +101,23 @@
 			$this->prefix = $site .  $this->prefix;
 		}
 		
-		public function getCharges($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . ".xml"), 'recurring-application-charge');		
+		public function get($cache = false){
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . FORMAT), 'recurring-application-charge');		
 			return $this->array['recurring-application-charge'];
 		}
 		
-		public function createCharge($fields){
+		public function create($fields){
 			$fields = array('recurring-application-charge' => $fields);
-			return sendToAPI($this->prefix . ".xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function activateCharge($id, $fields){
+		public function activate($id, $fields){
 			$fields = array('recurring-application-charge' => $fields);
-			return sendToAPI($this->prefix . "/" . $id . "/activate.xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "/" . $id . "/activate" . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function cancelCharge($id){
-			return sendToAPI($this->prefix . "/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function cancel($id){
+			return sendToAPI($this->prefix . "/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -127,48 +127,48 @@
 	}	
 
 	class Article{
-		private $prefix = "/blogs/:blog_id/";
+		private $prefix = "/blogs/";
 		private $array = array();
 		
-		public function __construct($blog, $site){
-			$this->prefix = $site . str_replace(':blog_id', $blog, $this->prefix);
+		public function __construct($site){
+			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getArticles($cache = false, $params = array()){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . 'articles.xml?' . $params), 'article');
-			}
+		public function get($blog_id, $article_id = 0, $cache = false, $params = array()){
+			if ($article_id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . $blog_id . '/articles.xml?' . $params), 'article');
+				}
 			
-			return $this->array['article'];
+				return $this->array['article'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . $blog_id . '/articles/' . $article_id . '.xml');
+					$this->array['article'][$article_id] = $temp;
+				}			
+				if (!isset($this->array['article'][$article_id])) throw new Exception("Article is not in cache. Set cache to false.");
+				return $this->array['article'][$article_id];
+			}
 		}
 		
-		public function getCount($params = array()){
+		public function count($blog_id, $params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . 'articles/count.xml?' . $params);
+			return sendToAPI($this->prefix . $blog_id . '/articles/count.xml?' . $params);
 		}
 		
-		public function getArticle($id, $cache = false){			
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . 'articles/' . $id . '.xml');
-				$this->array['article'][$id] = $temp;
-			}			
-			if (!isset($this->array['article'][$id])) throw new Exception("Article is not in cache. Set cache to false.");
-			return $this->array['article'][$id];
-		}
-		
-		public function createNewArticle($fields = array()){
+		public function create($blog_id, $fields = array()){
 			$fields = array('article' => $fields);
-			return sendToAPI($this->prefix . "articles.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . $blog_id . "/articles" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyArticle($id, $fields = array()){
+		public function modify($blog_id, $id, $fields = array()){
 			$fields = array('article' => $fields);
-			return sendToAPI($this->prefix . "articles/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . $blog_id . "/articles/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeArticle($id){
-			return sendToAPI($this->prefix . "articles/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($id){
+			return sendToAPI($this->prefix . $blog_id . "/articles/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -178,58 +178,39 @@
 	}
 	
 	class Asset{
-		private $prefix = "/assets.xml";
+		private $prefix = "/assets";
 		private $array = array();
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
 		}
 			
-		public function getAssets($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix), 'asset');		
-			return $this->array['asset'];
-		}
-		
-		public function getAsset($key, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . '?asset[key]=' . $key);
-				$this->array['asset'][$key] = $temp;
+		public function get($key = '', $cache = false){
+			if (isEmpty($key)){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix), 'asset');		
+				return $this->array['asset'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . FORMAT . '?asset[key]=' . $key);
+					$this->array['asset'][$key] = $temp;
+				}
+				if (!isset($this->array['asset'][$key])) throw new Exception("Asset does not exist in cache. Change cache to false.");		
+				return $this->array['asset'][$key];
 			}
-			if (!isset($this->array['asset'][$key])) throw new Exception("Asset does not exist in cache. Change cache to false.");		
-			return $this->array['asset'][$key];
 		}
-		
-		public function getThemeImage($key, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . '?asset[key]=' . $key);
-				$this->array['asset'][$key] = $temp;
-			}
-			if (!isset($this->array['asset'][$key])) throw new Exception("Asset does not exist in cache. Change cache to false.");		
-			return $this->array['asset'][$key];
-		}
-		
-		public function modifyAsset($fields){
+			
+		public function modify($fields){
 			$fields = array('asset' => $fields);
 			return sendToAPI($this->prefix, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function copyAsset($fields){
+		public function copy($fields){
 			$fields = array('asset' => $fields);
 			return sendToAPI($this->prefix, 'PUT', SUCCESS, $fields);			
 		}
 		
-		public function createImage($fields){
-			$fields = array('asset' => $fields);
-			return sendToAPI($this->prefix, 'PUT', SUCCESS, $fields);			
-		}
-		
-		public function modifyImage($fields){
-			$fields = array('asset' => $fields);
-			return sendToAPI($this->prefix, 'PUT', SUCCESS, $fields);
-		}
-		
-		public function removeAsset($key){
-			return sendToAPI($this->prefix . "?asset[key]=" . $key, 'DELETE', SUCCESS);
+		public function remove($key){
+			return sendToAPI($this->prefix . FORMAT . "?asset[key]=" . $key, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -246,36 +227,36 @@
 			$this->prefix = $site .  $this->prefix;
 		}
 		
-		public function getBlogs($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . ".xml"), 'blog');
-			return $this->array['blog'];
-		}
-		
-		public function blogCount(){
-			return sendToAPI($this->prefix . "/count.xml");
-		}
-		
-		public function getBlog($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "/" . $id . ".xml");
-				$this->array['blog'][$id] = $temp;
+		public function get($blog_id = 0, $cache = false){
+			if ($blog_id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . FORMAT), 'blog');
+				return $this->array['blog'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "/" . $blog_id . FORMAT);
+					$this->array['blog'][$id] = $temp;
+				}
+				if (!isset($this->array['blog'][$blog_id])) throw new Exception("Blog doesn't exist in cache. Turn cache to false.");		
+				return $this->array['blog'][$blog_id];
 			}
-			if (!isset($this->array['blog'][$id])) throw new Exception("Blog doesn't exist in cache. Turn cache to false.");		
-			return $this->array['blog'][$id];
 		}
 		
-		public function createBlog($fields){
+		public function count(){
+			return sendToAPI($this->prefix . "/count" . FORMAT . "?");
+		}
+
+		public function create($fields){
 			$fields = array('blog' => $fields);
-			return sendToAPI($this->prefix . ".xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyBlog($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('blog' => $fields);
-			return sendToAPI($this->prefix . "/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeBlog($id){
-			return sendToAPI($this->prefix . "/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($id){
+			return sendToAPI($this->prefix . "/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -292,41 +273,40 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCollections($params =  array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);			
-				$this->array = organizeArray(sendToAPI($this->prefix . "custom_collections.xml?" . $params), 'custom-collection');
+		public function get($params = array(), $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);			
+					$this->array = organizeArray(sendToAPI($this->prefix . "custom_collections" . FORMAT . "?" . $params), 'custom-collection');
+				}			
+				return $this->array['custom-collection'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "/custom_collections/" . $id . FORMAT);
+					$this->array['custom-collection'][$id] = $temp;				
+				}
+				if (!isset($this->array['custom-collection'][$id])) throw new Exception("Collection not in the cache. Set cache to false.");			
+				return $this->array['custom-collection'][$id];
 			}
-			
-			return $this->array['custom-collection'];
 		}
 		
-		public function collectionCount($params = array(), $product_id = 0){
+		public function count($params = array(), $product_id = 0){
 			$params = url_encode_array($params);			
-			return sendToAPI($this->prefix . "custom_collections/count.xml?" . $params);
+			return sendToAPI($this->prefix . "custom_collections/count" . FORMAT . "?" . $params);
 		}
 		
-		public function getCollection($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "/custom_collections/" . $id . ".xml");
-				$this->array['custom-collection'][$id] = $temp;				
-			}
-			if (!isset($this->array['custom-collection'][$id])) throw new Exception("Collection not in the cache. Set cache to false.");			
-			return $this->array['custom-collection'][$id];
-		}
-		
-		public function createCollection($fields){
+		public function create($fields){
 			$fields = array('custom-collection' => $fields);
-			return sendToAPI($this->prefix . "custom_collections.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "custom_collections" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyCollection($id){
+		public function modify($id){
 			$fields = array('custom-collection' => $fields);
-			return sendToAPI($this->prefix . "custom_collections/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "custom_collections/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeCollection($id){
-			return sendToAPI($this->prefix . "custom_collections/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($id){
+			return sendToAPI($this->prefix . "custom_collections/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -343,54 +323,53 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCollects($params = array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "collects.xml?" . $params), 'collect');
-			}
-			
-			return $this->array['collect'];
-		}
-		
-		public function countCollects($params = array()){
-			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "collects.xml?" . $params);
-		}
-		
-		public function getCollect($id = 0, $params = array(), $cache = false){
-			$collect = array();
-			
-			if (!$cache){
-				$params = url_encode_array($params);
-				if ($id > 0){
-					$temp = sendToAPI($this->prefix . "collects/" . $id . ".xml?" . $params);
-					$this->array['collect'][$id] = $temp;
-					$collect = $temp;
-				}else{
-					if (isset($params['product_id']) && isset($params['collection_id'])){
-						$temp = sendToAPI($this->prefix . "/collects.xml?" . $params);
-						
-						if (isset($temp['collect'][0])){
-							$id = $temp['collect'][0]['id'];
-							$this->array['collect'][$id] = $temp['collect'][0];
-							$collect = $temp['collect'][0];
-						}
+		public function get($params = array(), $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . "collects" . FORMAT . "?" . $params), 'collect');
+				}			
+				return $this->array['collect'];
+			}else{
+				$collect = array();
+
+				if (!$cache){
+					$params = url_encode_array($params);
+					if ($id > 0){
+						$temp = sendToAPI($this->prefix . "collects/" . $id . "" . FORMAT . "?" . $params);
+						$this->array['collect'][$id] = $temp;
+						$collect = $temp;
 					}else{
-						throw new Exception("Must specify a collect id or product_id and collection_id.");										
+						if (isset($params['product_id']) && isset($params['collection_id'])){
+							$temp = sendToAPI($this->prefix . "/collects" . FORMAT . "?" . $params);
+
+							if (isset($temp['collect'][0])){
+								$id = $temp['collect'][0]['id'];
+								$this->array['collect'][$id] = $temp['collect'][0];
+								$collect = $temp['collect'][0];
+							}
+						}else{
+							throw new Exception("Must specify a collect id or product_id and collection_id.");										
+						}
 					}
 				}
+
+				return $collect;
 			}
-			
-			return $collect;
 		}
 		
-		public function createCollect($fields){
+		public function count($params = array()){
+			$params = url_encode_array($params);
+			return sendToAPI($this->prefix . "collects" . FORMAT . "?" . $params);
+		}
+		
+		public function create($fields){
 			$fields = array('collect' => $fields);
-			return sendToAPI($this->prefix . "collects.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "collects" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function removeCollect($id){
-			return sendToAPI($this->prefix . "custom_collections.xml", 'POST', CREATED);
+		public function remove($id){
+			return sendToAPI($this->prefix . "custom_collections" . FORMAT, 'POST', CREATED);
 		}
 					
 		public function __destruct(){
@@ -407,45 +386,44 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getComments($params = array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "comments.xml?" . $params), 'comment');
-			}			
-			
-			return $this->array['comment'];
-		}
-		
-		public function commentCount($params = array()){
-			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "comments/count.xml?" . $params);
-		}
-		
-		public function getComment($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "comments/" . $id . ".xml");
-				$this->array['comment'][$id] = $temp;
+		public function get($params = array(), $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . "comments" . FORMAT . "?" . $params), 'comment');
+				}			
+				return $this->array['comment'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "comments/" . $id . FORMAT);
+					$this->array['comment'][$id] = $temp;
+				}
+				if (!isset($this->array['comment'][$id])) throw new Exception("Comment is not in cache. Set cache to false.");
+				return $this->array['comment'][$id];
 			}
-			if (!isset($this->array['comment'][$id])) throw new Exception("Comment is not in cache. Set cache to false.");
-			return $this->array['comment'][$id];
 		}
 		
-		public function createComment($fields){
-			$fields = array('comment' => $fields);
-			return sendToAPI($this->prefix . "comments.xml", 'POST', CREATED, $fields);
+		public function count($params = array()){
+			$params = url_encode_array($params);
+			return sendToAPI($this->prefix . "comments/count" . FORMAT . "?" . $params);
 		}
 		
-		public function modifyComment($id, $fields){
+		public function create($fields){
 			$fields = array('comment' => $fields);
-			return sendToAPI($this->prefix . "comments/" . $id . ".xml", 'POST', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "comments" . FORMAT, 'POST', CREATED, $fields);
+		}
+		
+		public function modify($id, $fields){
+			$fields = array('comment' => $fields);
+			return sendToAPI($this->prefix . "comments/" . $id . FORMAT, 'POST', SUCCESS, $fields);
 		}
 		
 		public function markAsSpam($id){
-			return sendToAPI($this->prefix . "comments/" . $id . "/spam.xml", 'POST', SUCCESS);
+			return sendToAPI($this->prefix . "comments/" . $id . "/spam" . FORMAT, 'POST', SUCCESS);
 		}
 
-		public function approveComment($id){
-			return sendToAPI($this->prefix . "comments/" . $id . "/approve.xml", 'POST', SUCCESS);
+		public function approve($id){
+			return sendToAPI($this->prefix . "comments/" . $id . "/approve" . FORMAT, 'POST', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -462,36 +440,36 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCountries($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "countries.xml"), 'country');
-			return $this->array['country'];
+		public function get($id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "countries" . FORMAT . "?"), 'country');
+				return $this->array['country'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "countries/" . $id . FORMAT);
+					$this->array['country'][$id] = $temp;
+				}			
+				if (!isset($this->array['country'][$id])) throw new Exception("Country not in cache. Set cache to false.");		
+				return $this->array['country'][$id];
+			}
 		}
 		
-		public function countryCount(){
-			return sendToAPI($this->prefix . "countries/count.xml");
+		public function count(){
+			return sendToAPI($this->prefix . "countries/count" . FORMAT . "?");
 		}
 		
-		public function getCountry($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "countries/" . $id . ".xml");
-				$this->array['country'][$id] = $temp;
-			}			
-			if (!isset($this->array['country'][$id])) throw new Exception("Country not in cache. Set cache to false.");		
-			return $this->array['country'][$id];
-		}
-		
-		public function createCountry($fields){
+		public function create($fields){
 			$fields = array('country' => $fields);
-			return sendToAPI($this->prefix . "countries.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "countries" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyCountry($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('country' => $fields);
-			return sendToAPI($this->prefix . "countries/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "countries/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function deleteCountry($id){
-			return sendToAPI($this->prefix . "countries/" . $id . ".xml", 'DELETE', SUCCESS, $fields);
+		public function delete($id){
+			return sendToAPI($this->prefix . "countries/" . $id . FORMAT, 'DELETE', SUCCESS, $fields);
 		}
 		
 		public function __destruct(){
@@ -508,31 +486,31 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getEvents($params = array()){
-			$params = url_encode_array($params);
-			$this->array = organizrArray(sendToAPI($this->prefix . "events.xml?" . $params), 'event');			
-			return $this->array['event'];
-		}
-		
-		public function getOrderEvents($id, $params = array()){
-			$params = url_encode_array($params);
-			$this->array = organizeArray(sendToAPI($this->prefix . "orders/" . $id . "/events.xml?" . $params), 'event');			
-			return $this->array['event'];
-		}
-		
-		public function getProductEvents($id, $params = array()){
-			$params = url_encode_array($params);			
-			$this->array = organizeArray(sendToAPI($this->prefix . "products/" . $id . "/events.xml?" . $params), 'event');			
-			return $this->array['event'];
-		}
-		
-		public function getEvent($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "events/" . $id . ".xml");
-				$this->array['event'][$id] = $temp;
-			}			
-			if (!isset($this->array['event'][$id])) throw new Exception("Event not found in the cache. Set cache to false.");
-			return $this->array['event'][$id];
+		public function get($params = array(), $id = 0, $order = 0, $product = 0){
+			if ($product == 0 && $order == 0){
+				if ($event_id == 0){
+					$params = url_encode_array($params);
+					$this->array = organizrArray(sendToAPI($this->prefix . "events" . FORMAT . "?" . $params), 'event');			
+					return $this->array['event'];
+				}else{
+					if (!$cache){
+						$temp = sendToAPI($this->prefix . "events/" . $id . FORMAT);
+						$this->array['event'][$id] = $temp;
+					}			
+					if (!isset($this->array['event'][$id])) throw new Exception("Event not found in the cache. Set cache to false.");
+					return $this->array['event'][$id];
+				}
+			}
+			else if ($product > 0 && $order == 0){
+				$params = url_encode_array($params);			
+				$this->array = organizeArray(sendToAPI($this->prefix . "products/" . $id . "/events" . FORMAT . "?" . $params), 'event');			
+				return $this->array['event'];
+			}
+			else if ($product == 0 && $order > 0){
+				$params = url_encode_array($params);
+				$this->array = organizeArray(sendToAPI($this->prefix . "orders/" . $id . "/events" . FORMAT . "?" . $params), 'event');			
+				return $this->array['event'];
+			}
 		}
 		
 		public function __destruct(){
@@ -542,48 +520,48 @@
 	}
 	
 	class Fullfillment{
-		private $prefix = "/orders/:order_id/";
+		private $prefix = "/orders/";
 		private $array = array();
 		
-		public function __construct($order_id, $site){
-			$this->prefix = $site . str_replace(':order_id', $order_id, $this->prefix);
+		public function __construct($site){
+			$this->prefix = $site . $this->prefix;
 		}
 	
-		public function getFullfillments($params = array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "fullfillments.xml?" . $params), 'fullfillment');
-			}			
-			return $this->array['fullfillment'];
+		public function get($order_id, $id = 0, $params = array(), $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/fullfillments" . FORMAT . "?" . $params), 'fullfillment');
+				}			
+				return $this->array['fullfillment'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . $order_id . "/fullfillments/" . $id . FORMAT);
+					$this->array['fullfillment'][$id] = $temp;
+				}			
+				if (!isset($this->array['fullfillment'][$id])) throw new Exception("Fullfillment not in cache. Set cache to false.");		
+				return $this->array['fullfillent'][$id];
+			}
 		}
 		
-		public function getFullfillmentCount($params = array()){
+		public function count($order_id, $params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "fullfillments/count.xml?" . $params);
+			return sendToAPI($this->prefix . $order_id . "/fullfillments/count" . FORMAT . "?" . $params);
 		}
 		
-		public function getFullfillment($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "fullfillments/" . $id . ".xml");
-				$this->array['fullfillment'][$id] = $temp;
-			}			
-			if (!isset($this->array['fullfillment'][$id])) throw new Exception("Fullfillment not in cache. Set cache to false.");		
-			return $this->array['fullfillent'][$id];
-		}
-		
-		public function createFullfillment($fields){
+		public function create($order_id, $fields){
 			$fields = array('fullfillment' => $fields);
-			return sendToAPI($this->prefix . "fullfillments.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . $order_id . "/fullfillments" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function fullfillItems($id, $fields){
+		public function fullfill($order_id, $id, $fields){
 			$fields = array('fullfillment' => $fields);
-			return sendToAPI($this->prefix . "fullfillments.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . $order_id . "/fullfillments" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyFullfillment($id, $fields){
+		public function modify($order_id, $id, $fields){
 			$fields = array('article' => $fields);
-			return sendToAPI($this->prefix . "fullfillments/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . $order_id . "/fullfillments/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
 		public function __destruct(){
@@ -595,44 +573,42 @@
 	class Metafield{
 		private $prefix = "/";
 		private $array;
-		private $product_id;
 		
-		public function __construct($product_id, $site){
+		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
-			$this->product_id = $product_id;
 		}
 		
-		public function getMetafields($params = array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$xmlObj = ($product_id > 0) ? sendToAPI($this->prefix . "metafields.xml?" . $params) : sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields.xml?" . $params);				
-				$this->array = organizeArray($xmlObj, 'metafield');
+		public function get($product_id = 0, $id = 0, $params = array(), $cache = false){
+			if ($product_id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$xmlObj = ($product_id > 0) ? sendToAPI($this->prefix . "metafields" . FORMAT . "?" . $params) : sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields" . FORMAT . "?" . $params);				
+					$this->array = organizeArray($xmlObj, 'metafield');
+				}			
+				return $this->array['metafield'];
+			}else{
+				if ($id == 0) throw new Exception("You must have a product and metafield id.");
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "products/" . $product_id . "/metafields/" . $id . FORMAT);
+					$this->array['metafield'][$id] = $temp;
+				}			
+				if (!isset($this->array['metafield'][$id])) throw new Exception("Metafield not found in cache. Set cache to false.");
+				return $this->array['metafield'][$id];
 			}
-			
-			return $this->array['metafield'];
 		}
 		
-		public function getMetafield($metafield_id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $metafield_id . ".xml");
-				$this->array['metafield'][$metafield_id] = $temp;
-			}			
-			if (!isset($this->array['metafield'][$metafield_id])) throw new Exception("Metafield not found in cache. Set cache to false.");
-			return $this->array['metafield'][$metafield_id];
-		}
-		
-		public function newMetafield($fields){
+		public function create($product_id, $fields){
 			$fields = array('metafield' => $fields);
-			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields.xml", 'POST', CREATED, $fields) : sendToAPI($this->prefix . "metafields.xml", 'POST', CREATED, $fields);
+			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $product_id . "/metafields" . FORMAT, 'POST', CREATED, $fields) : sendToAPI($this->prefix . "metafields" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyMetafield($id, $fields){
+		public function modify($product_id, $id, $fields){
 			$fields = array('metafield' => $fields);
-			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $id . ".xml", 'PUT', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . ".xml", 'PUT', SUCCESS);
+			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $product_id . "/metafields/" . $id . FORMAT, 'PUT', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . FORMAT, 'PUT', SUCCESS);
 		}
 		
-		public function removeMetafield($id){
-			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields/" . $id . ".xml", 'DELETE', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($product_id, $id){
+			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $product_id . "/metafields/" . $id . FORMAT, 'DELETE', SUCCESS) : sendToAPI($this->prefix . "metafields/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -650,45 +626,44 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getOrders($params = array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "orders.xml?" . $params), 'order');
+		public function get($params = array(), $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . "orders" . FORMAT . "?" . $params), 'order');
+				}			
+				return $this->array['order'];
+			}else{
+				if (!$cache){
+					$temp = semdToAPI($this->prefix . "orders/" . $id . FORMAT);
+					$this->array['order'][$id] = $temp;
+				}
+				if (!isset($this->array['order'][$id])) throw new Exception("Order not in cache. Set cache to false.");			
+				return $this->array['order'][$id];
 			}
-			
-			return $this->array['order'];
 		}		
 		
-		public function getOrder($id, $cache = false){
-			if (!$cache){
-				$temp = semdToAPI($this->prefix . "orders/" . $id . ".xml");
-				$this->array['order'][$id] = $temp;
-			}
-			if (!isset($this->array['order'][$id])) throw new Exception("Order not in cache. Set cache to false.");			
-			return $this->array['order'][$id];
-		}
-		
-		public function countOrders($params = array()){
+		public function count($params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "orders/count.xml?" . $params);
+			return sendToAPI($this->prefix . "orders/count" . FORMAT . "?" . $params);
 		}
 		
-		public function openOrder($id){
-			return sendToAPI($this->prefix . "orders/" . $id . "/open.xml", 'POST', SUCCESS);
+		public function open($id){
+			return sendToAPI($this->prefix . "orders/" . $id . "/open" . FORMAT, 'POST', SUCCESS);
 		}
 		
-		public function closeOrder($id){
-			return sendToAPI($this->prefix . "orders/" . $id . "/close.xml", 'POST', SUCCESS);
+		public function close($id){
+			return sendToAPI($this->prefix . "orders/" . $id . "/close" . FORMAT, 'POST', SUCCESS);
 		}
 		
-		public function modifyOrder($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('order' => $fields);
-			return sendToAPI($this->prefix . "orders/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "orders/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
 		public function setNoteAttributes($id, $fields){
 			$fields = array('order' => array('id' => $id, 'note-attributes' => array('note-attribute' => $fields)));
-			return sendToAPI($this->prefix . "orders/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "orders/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 			
 		public function __destruct(){
@@ -705,36 +680,36 @@
 			$this->prefix = $site . $this->prefix;		
 		}
 		
-		public function getPages($cache = false, $params = array()){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "pages.xml?" . $params), 'page');
-			return $this->array['page'];
+		public function get($id = 0, $cache = false, $params = array()){
+			if ($id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "pages" . FORMAT . "?" . $params), 'page');
+				return $this->array['page'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "pages/" . $id . FORMAT);
+					$this->array['page'][$id] = $temp;
+				}			
+				if (!isset($this->array['page'][$id])) throw new Exception("Page not in cache. Set cache to false.");
+				return $this->array['page'][$id];
+			}
 		}
 		
-		public function pageCount($params = array()){
-			return sendToAPI($this->prefix . "pages/count.xml?" . $params);
+		public function count($params = array()){
+			return sendToAPI($this->prefix . "pages/count" . FORMAT . "?" . $params);
 		}
 		
-		public function getPage($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "pages/" . $id . ".xml");
-				$this->array['page'][$id] = $temp;
-			}			
-			if (!isset($this->array['page'][$id])) throw new Exception("Page not in cache. Set cache to false.");
-			return $this->array['page'][$id];
-		}
-		
-		public function createPage($fields){
+		public function create($fields){
 			$fields = array('page' => $fields);
-			return sendToAPI($this->prefix . "pages.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "pages" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyPage($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('page' => $fields);
-			return sendToAPI($this->prefix . "pages/" . $id .".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "pages/" . $id .FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removePage($id){
-			return sendToAPI($this->prefix . "pages/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($id){
+			return sendToAPI($this->prefix . "pages/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -751,39 +726,39 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getProducts($params = array(), $collection_id = 0, $cache = false){
-			if (!$cache){				
-				$xmlObj = ($collection_id > 0) ? sendToAPI($this->prefix . "products.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products.xml?" . $params);
-				$this->array = organizeArray($xmlObj, 'product');
-			}			
-			return $this->array['product'];
-		}
-		
-		public function productCount($params = array(), $collection_id = 0){
-			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count.xml?" . $params);
-		}
-		
-		public function getProduct($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "products/" . $id . ".xml");
-				$this->array['product'][$id] = $temp;
+		public function get($params = array(), $id = 0, $collection_id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){				
+					$xmlObj = ($collection_id > 0) ? sendToAPI($this->prefix . "products.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products" . FORMAT . "?" . $params);
+					$this->array = organizeArray($xmlObj, 'product');
+				}			
+				return $this->array['product'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "products/" . $id . FORMAT);
+					$this->array['product'][$id] = $temp;
+				}
+				if (!isset($this->array['product'][$id])) throw new Exception("Product not in cache. Set cache to false.");		
+				return $this->array['product'][$id];
 			}
-			if (!isset($this->array['product'][$id])) throw new Exception("Product not in cache. Set cache to false.");		
-			return $this->array['product'][$id];
-		}
-			
-		public function createProduct(){
-			$fields = array('product' => $fields);
-			return sendToAPI($this->prefix . "product.xml", 'POST', CREATED, $fields);
 		}
 		
-		public function modifyProduct(){
+		public function count($params = array(), $collection_id = 0){
+			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count" . FORMAT . "?" . $params);
+		}
+				
+		public function create(){
 			$fields = array('product' => $fields);
-			return sendToAPI($this->prefix . "products/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "product" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function removeProduct(){
-			return sendToAPI($this->prefix . "products/". $id . ".xml", 'DELETE', SUCCESS);
+		public function modify($id){
+			$fields = array('product' => $fields);
+			return sendToAPI($this->prefix . "products/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
+		}
+		
+		public function remove($id){
+			return sendToAPI($this->prefix . "products/". $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -793,25 +768,25 @@
 	}
 	
 	class ProductImage{
-		private $prefix = "/products/:product_id/";
+		private $prefix = "/products/";
 		private $array;
 		
-		public function __construct($product_id, $site){
-			$this->prefix = $site . str_replace(':product_id', $product_id, $this->prefix);
+		public function __construct($site){
+			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getImages($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "images.xml"), 'image');
+		public function get($product_id, $cache = false){
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $product_id . "/images" . FORMAT . "?"), 'image');
 			return $this->array['image'];
 		}
 		
-		public function createImage($fields){
+		public function create($product_id, $fields){
 			$fields = array('image' => $fields);
-			return sendToAPI($this->prefix . "images.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . $product_id . "/images" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function removeImage($id){
-			return sendToAPI($this->prefix . "images/". $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($product_id, $id){
+			return sendToAPI($this->prefix . $product_id . "/images/". $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -821,43 +796,43 @@
 	}
 	
 	class ProductVariant{
-		private $prefix = "/products/:product_id/";
+		private $prefix = "/products/";
 		private $array = array();
 		
-		public function __construct($product_id, $site){
-			$this->prefix = $site . str_replace(':product_id', $product_id, $this->prefix);
+		public function __construct($site){
+			$this->prefix = $site . $this->prefix;;
 		}
 		
-		public function getVariants($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "/variants.xml"), 'variant');
-			return $this->array['variant'];
+		public function get($product_id, $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $product_id . "/variants" . FORMAT . "?"), 'variant');
+				return $this->array['variant'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . $product_id . "/variants/" . $id . FORMAT);
+					$this->array['variant'][$id] = $temp;
+				}			
+				if (!isset($this->array['variant'][$id])) throw new Exception("Variant not in cache. Change cache to false.");
+				return $this->array['variant'][$id];	
+			}
 		}
 		
-		public function variantCount(){
-			return sendToAPI($this->prefix . $this->product_id . "/variants/count.xml");
+		public function count($product_id){
+			return sendToAPI($this->prefix . $product_id . "/variants/count" . FORMAT . "?");
 		}
 		
-		public function getVariant($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . $this->product_id . "/variants/" . $id . ".xml");
-				$this->array['variant'][$id] = $temp;
-			}			
-			if (!isset($this->array['variant'][$id])) throw new Exception("Variant not in cache. Change cache to false.");
-			return $this->array['variant'][$id];
-		}
-		
-		public function createVariant($fields){
+		public function create($product_id, $fields){
 			$fields = array('variant' => $fields);
-			return sendToAPI($this->prefix . "variants.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . $product_id . "/variants" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyVariant($id, $fields){
+		public function modify($product_id, $id, $fields){
 			$fields = array('variant' => $fields);
-			return sendToAPI($this->prefix . "variants/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . $product_id . "/variants/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeVariant($id){
-			return sendToAPI($this->prefix . "variants/" . $id . "xml", 'DELETE', SUCCESS);
+		public function remove($product_id, $id){
+			return sendToAPI($this->prefix . $product_id . "/variants/" . $id . "xml", 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -867,35 +842,35 @@
 	}
 	
 	class Province{
-		private $prefix = "/countries/:country_id/";
+		private $prefix = "/countries/";
 		private $array = array();
 		
 		
-		public function __construct($country_id, $site){
-			$this->prefix = $site . str_replace(':country_id', $country_id, $this->prefix);
+		public function __construct($site){
+			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getProvinces(){
-			$this->array = organizeArray(sendToAPI($this->prefix . "provinces.xml"), 'pronvince');
-			return $this->array['province'];
+		public function get($country_id, $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $country_id . "/provinces" . FORMAT . "?"), 'pronvince');
+				return $this->array['province'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . $country_id . "/provinces/" . $id . FORMAT);
+					$this->array['province'][$id] = $temp;
+				}			
+				if (!isset($this->array['province'][$id])) throw new Exception("Province not in cache. Set cache to false.");
+				return $this->array['province'][$id];
+			}
 		}
 		
-		public function provinceCount(){
-			return sendToAPI($this->prefix . "provinces/count.xml");
+		public function count($country_id){
+			return sendToAPI($this->prefix . $country_id . "/provinces/count" . FORMAT . "?");
 		}
 		
-		public function getProvince($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "provinces/" . $id . ".xml");
-				$this->array['province'][$id] = $temp;
-			}			
-			if (!isset($this->array['province'][$id])) throw new Exception("Province not in cache. Set cache to false.");
-			return $this->array['province'][$id];
-		}
-		
-		public function modifyProvince($id, $fields){
+		public function modify($country_id, $id, $fields){
 			$fields = array('province' => $fields);
-			return sendToAPI($this->prefix . "provinces/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . $country_id . "/provinces/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
 		public function __destruct(){
@@ -912,39 +887,39 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getRedirects($params = array(), $cache = false){			
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "redirects.xml?" . $params), 'redirect');
-			}		
-			return $this->array['redirect'];
+		public function get($params = array(), $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . "redirects" . FORMAT . "?" . $params), 'redirect');
+				}		
+				return $this->array['redirect'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "redirects/" . $id .FORMAT);
+					$this->array['redirect'][$id] = $temp;
+				}			
+				if (!isset($this->array['redirect'][$id])) throw new Exception("Redirect not found in cache. Set cache to false.");
+				return $this->array['redirect'][$id];
+			}
 		}
 		
-		public function redirectCount($params){
-			return sendToAPI($this->prefix . "redirects/count.xml?" . $params);
+		public function count($params){
+			return sendToAPI($this->prefix . "redirects/count" . FORMAT . "?" . $params);
 		}
 		
-		public function getRedirect($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "redirects/" . $id .".xml");
-				$this->array['redirect'][$id] = $temp;
-			}			
-			if (!isset($this->array['redirect'][$id])) throw new Exception("Redirect not found in cache. Set cache to false.");
-			return $this->array['redirect'][$id];
-		}
-		
-		public function createRedirect($fields){
+		public function create($fields){
 			$fields = array('redirect' => $fields);
-			return sendToAPI($this->prefix . "redirects.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "redirects" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyRedirect($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('redirect' => $fields);
-			return sendToAPI($this->prefix . "redirects/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "redirects/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeRedirect($id){
-			return sendToAPI($this->prefix . "redirects/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($id){
+			return sendToAPI($this->prefix . "redirects/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -959,7 +934,7 @@
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
-			$this->shop = sendToAPI($this->prefix . "shop.xml");
+			$this->shop = sendToAPI($this->prefix . "shop" . FORMAT . "?");
 		}
 		
 		public function __destruct(){
@@ -976,41 +951,40 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getCollections($params =  array(), $cache = false){
-			if (!$cache){
-				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "smart_collections.xml?" . $params), 'smart-collection');
+		public function get($params =  array(), $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache){
+					$params = url_encode_array($params);
+					$this->array = organizeArray(sendToAPI($this->prefix . "smart_collections" . FORMAT . "?" . $params), 'smart-collection');
+				}
+				return $this->array['smart-collection'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "/smart_collections/" . $id . FORMAT);
+					$this->array['smart-collection'][$id] = $temp;				
+				}			
+				if (!isset($this->array['smart-collection'][$id])) throw new Exception("Collection not in the cache. Set cache to false.");
+				return $this->array['smart-collection'][$id];
 			}
-			return $this->array['smart-collection'];
 		}
 		
-		public function collectionCount($params = array()){
+		public function count($params = array()){
 			$params = url_encode_array($params);			
-			return sendToAPI($this->prefix . "smart_collections/count.xml?" . $params);			
+			return sendToAPI($this->prefix . "smart_collections/count" . FORMAT . "?" . $params);			
 		}
 		
-		public function getCollection($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "/smart_collections/" . $id . ".xml");
-				$this->array['smart-collection'][$id] = $temp;				
-			}			
-			if (!isset($this->array['smart-collection'][$id])) throw new Exception("Collection not in the cache. Set cache to false.");
-			return $this->array['smart-collection'][$id];
-		}
-		
-		public function createCollection($fields){
+		public function create($fields){
 			$fields = array('smart-collection' => $fields);
-			return sendToAPI($this->prefix . "smart_collections.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "smart_collections" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyCollection($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('smart-collection' => $fields);
-			return sendToAPI($this->prefix . "smart_collections/" . $id . ".xml", 'PUT', SUCCESS, $fields);
-			
+			return sendToAPI($this->prefix . "smart_collections/" . $id . FORMAT, 'PUT', SUCCESS, $fields);	
 		}
 		
-		public function deleteCollection($id){
-			return sendToAPI($this->prefix . "smart_collections/" . $id . ".xml", 'DELETE', SUCCESS);
+		public function delete($id){
+			return sendToAPI($this->prefix . "smart_collections/" . $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -1020,34 +994,34 @@
 	}
 	
 	class Transaction{
-		private $prefix = "/orders/:order_id/";
+		private $prefix = "/orders/";
 		private $array = array();
 		
-		public function __construct($order_id, $site){
-			$this->prefix = $site . str_replace(':order_id', $order_id, $this->prefix);
+		public function __construct($site){
+			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getTransactions($cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "transactions.xml"), 'transaction');			
-			return $this->array['transaction'];
+		public function get($order_id, $id = 0, $cache = false){
+			if ($id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/transactions" . FORMAT . "?"), 'transaction');			
+				return $this->array['transaction'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . $order_id . "/transactions/" . $id . FORMAT);
+					$this->array['transaction'][$id] = $temp;
+				}			
+				if (!isset($this->array['transaction'][$id])) throw new Exception("Transaction not in cache. Set cache to false.");			
+				return $this->array['transaction'][$id];
+			}
 		}
 		
-		public function transactionCount($id){
-			return sendToAPI($this->prefix . "transactions/count.xml");
+		public function count($order_id){
+			return sendToAPI($this->prefix . $order_id . "/transactions/count" . FORMAT . "?");
 		}
-		
-		public function getTransaction($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "transactions/" . $id . ".xml");
-				$this->array['transaction'][$id] = $temp;
-			}			
-			if (!isset($this->array['transaction'][$id])) throw new Exception("Transaction not in cache. Set cache to false.");			
-			return $this->array['transaction'][$id];
-		}
-		
-		public function createTransaction($fields){
+
+		public function create($order_id, $fields){
 			$fields = array('transaction' => $fields);
-			return sendToAPI($this->prefix . "transactions.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . $order_id . "/transactions" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
 		public function __destruct(){
@@ -1064,37 +1038,37 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function getHooks($cache = false, $params = array()){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks.xml?" . $params), 'webhook');
-			return $this->array['webhok'];
+		public function get($cache = false, $id = 0, $params = array()){
+			if ($id == 0){
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks" . FORMAT . "?" . $params), 'webhook');
+				return $this->array['webhok'];
+			}else{
+				if (!$cache){
+					$temp = sendToAPI($this->prefix . "webhooks/" . $id . FORMAT);
+					$this->array['webhook'][$id] = $temp;
+				}
+				if (!isset($this->array['webhook'][$id])) throw new Exception("Webhook not in cache. Set cache to false.");
+				return $this->array['webhook'][$id];
+			}
 		}
 		
-		public function hookCount($params = array()){
-			$xmlObj = new parser($this->prefix . "webhooks/count.xml?" . $params);
+		public function count($params = array()){
+			$xmlObj = new parser($this->prefix . "webhooks/count" . FORMAT . "?" . $params);
 			return $xmlObj->resultArray();
 		}
 		
-		public function getHook($id, $cache = false){
-			if (!$cache){
-				$temp = sendToAPI($this->prefix . "webhooks/" . $id . ".xml");
-				$this->array['webhook'][$id] = $temp;
-			}
-			if (!isset($this->array['webhook'][$id])) throw new Exception("Webhook not in cache. Set cache to false.");
-			return $this->array['webhook'][$id];
-		}
-		
-		public function createHook(){
+		public function create(){
 			$fields = array('webhook' => $fields);
-			return sendToAPI($this->prefix . "webhooks.xml", 'POST', CREATED, $fields);
+			return sendToAPI($this->prefix . "webhooks" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modifyHook($id, $fields){
+		public function modify($id, $fields){
 			$fields = array('webhook' => $fields);
-			return sendToAPI($this->prefix . "webhooks/" . $id . ".xml", 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . "webhooks/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function removeHook($id){
-			return sendToAPI($this->prefix . "webhooks/". $id . ".xml", 'DELETE', SUCCESS);
+		public function remove($id){
+			return sendToAPI($this->prefix . "webhooks/". $id . FORMAT, 'DELETE', SUCCESS);
 		}
 		
 		public function __destruct(){
@@ -1109,11 +1083,33 @@
 		private $protocol = 'https';
 		private $format;
 		
-		private $shop;
-		
 		private $url;
 		private $token;
 		private $name;
+		
+		public $application_charge;
+		public $recurring_application_charge;
+		public $article;
+		public $asset;
+		public $blog;
+		public $collect;
+		public $comment;
+		public $country;
+		public $custom_collection;
+		public $event;
+		public $fullfillment;
+		public $metafield;
+		public $order;
+		public $page;
+		public $product;
+		public $product_image;
+		public $product_variant;
+		public $province;
+		public $redirect;
+		public $shop;
+		public $smart_collection;
+		public $transaction;
+		public $webhook;
 						
 		/*
 			BEGIN PUBLIC
@@ -1133,12 +1129,34 @@
 				}
 			}
 			$this->prepare_url($this->url);
+			
+			if ($this->valid()){
+				$this->application_charge 			= new ApplicationCharge($this->site());
+				$this->recurring_application_charge = new RecurringApplicationCharge($this->site());;
+				$this->article 						= new Article($this->site());
+				$this->asset 						= new Asset($this->site());
+				$this->blog 						= new Blog($this->site());
+				$this->collect 						= new Collect($this->site());
+				$this->comment 						= new Comment($this->site());
+				$this->country 						= new Country($this->site());
+				$this->custom_collection 			= new CustomCollection($this->site());
+				$this->event 						= new Event($this->site());
+				$this->fullfillment					= new Fullfillment($this->site());
+				$this->metafield 					= new Metafield($this->site());
+				$this->order 						= new Order($this->site());
+				$this->page 						= new Page($this->site());
+				$this->product 						= new Product($this->site());
+				$this->product_image 				= new ProductImage($this->site());
+				$this->product_variant 				= new ProductVariant($this->site());
+				$this->province 					= new Province($this->site());
+				$this->redirect 					= new Redirect($this->site());
+				$this->shop							= new Shop($this->site());
+				$this->smart_collection 			= new SmartCollection($this->site());
+				$this->transaction 					= new Transaction($this->site());
+				$this->webhook 						= new Webhook($this->site());
+			}
 		}
-		
-		public function shop(){
-			return $this->shop;
-		}
-		
+			
 		public function create_permission_url(){
 			return (isEmpty($this->url) || isEmpty($this->api_key)) ? '' : 'http://' . $this->url . '/admin/api/auth?api_key=' . $this->api_key;
 		}
@@ -1157,10 +1175,32 @@
 			unset($this->secret);
 			unset($this->protocol);
 			unset($this->format);
-			unset($this->shop);
 			unset($this->url);
 			unset($this->token);
 			unset($this->name);
+			unset($this->application_charge);
+			unset($this->recurring_application_charge);
+			unset($this->article);
+			unset($this->asset);
+			unset($this->blog);
+			unset($this->collect);
+			unset($this->comment);
+			unset($this->country);
+			unset($this->custom_collection);
+			unset($this->event);
+			unset($this->fullfillment);
+			unset($this->metafield);
+			unset($this->order);
+			unset($this->page);
+			unset($this->product);
+			unset($this->product_image);
+			unset($this->product_variant);
+			unset($this->province);
+			unset($this->redirect);
+			unset($this->shop);
+			unset($this->smart_collection);
+			unset($this->transaction);
+			unset($this->webhook);
 		}
 		
 		/*
@@ -1197,6 +1237,10 @@
 	class miniCURL{
 		
 		private $ch;
+		
+		public function __construct(){
+			if (!function_exists('curl_init')) die("Error: cURL does not exist! Please install cURL.");
+		}
 		
 		public function send($url, $request = 'GET', $xml_payload = '', $headers = array('Accept-Encoding: gzip')){
 			$this->ch = curl_init($url);
