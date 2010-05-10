@@ -9,4 +9,6 @@
 	
 	define('SUCCESS', 200);
 	define('CREATED', 201);
+	
+	define('FORMAT', '.xml'); // .xml || .json
 ?>
