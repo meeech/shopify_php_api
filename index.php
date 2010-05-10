@@ -1,7 +1,4 @@
 <?php
-	echo '<!--';
-	//error_reporting(0); 
-	//ini_set("display_errors", 0);
 	include('lib/shopify_api.php');
 	
 	if (!file_exists('lib/shopify_api_config.php')) die('lib/shopify_api_config.php is missing!');
@@ -9,10 +6,10 @@
 	if (!defined('API_KEY') || !defined('SECRET') || isEmpty(API_KEY) || isEmpty(SECRET)) die('Both constants API_KEY and SECRET must be defined in the config file.');
 		
 	/* GET VARIABLES */
-	$url = $_GET['shop'];
-	$token = $_GET['t'];
-	$timestamp = $_GET['timestamp'];
-	$signature = $_GET['signature'];
+	$url = (isset($_GET['shop'])) ? mysql_escape_string($_GET['shop']) : '';
+	$token = (isset($_GET['t'])) ? mysql_escape_string($_GET['t']) : '';
+	$timestamp = (isset($_GET['timestamp'])) ? mysql_escape_string($_GET['timestamp']) : '';
+	$signature = (isset($_GET['signature'])) ? mysql_escape_string($_GET['signature']) : '';
 	$params = array('timestamp' => $timestamp, 'signature' => $signature);
 	$id = (is_numeric($_GET['id']) && isset($_GET['id'])) ? $_GET['id'] : 0;
 	
@@ -58,7 +55,6 @@
 	}
 	
 	mysql_close($conn);
-	echo '-->';
 	/*
 		Step 1:
 		Create a new Shopify API object with the $url, $token, $api_key, and $secret, and [$params]
@@ -72,7 +68,8 @@
 	if ($api->valid()){
 		//All objects need to be passed $api->site();
 		$article = new Article(597742, $api->site());
-		$result = $article->createNewArticle(array('title' => 'Testing from the PHP API!', 'body' => 'Hey there! I posted this article from the API!'));
-		print_r($result);
+		//$result = $article->createNewArticle(array('title' => 'Testing from the PHP API!', 'body' => 'Hey there! I posted this article from the API!'));
+		//print_r($article->getArticles());
+		print_r($article->getArticle(1619542));
 	}
 ?>
