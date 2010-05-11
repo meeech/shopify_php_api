@@ -2,8 +2,8 @@
 /*
 	Shopify PHP API
 	Created: May 4th, 2010
-	Modified: May 10th, 2010
-	Version: 1.20100510
+	Modified: May 11th, 2010
+	Version: 1.20100511
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -1138,7 +1138,7 @@
 					throw new Exception('Invalid signature: Possible malicious login.');
 				}
 			}
-			$this->prepare_url($this->url);
+			$this->url = $this->prepare_url($this->url);
 			
 			if ($this->valid()){
 				$this->application_charge 			= new ApplicationCharge($this->site());
@@ -1225,6 +1225,10 @@
 		private function prepare_url($url){
 			if (isEmpty($url)) return '';
 			$url = preg_replace('/https?:\/\//', '', $url);
+			if (substr_count($url, '.myshopify.com') == 0 && substr_count($url, '.com') == 0){
+				$url .= '.myshopify.com';
+			}
+			return $url;
 		}
 		
 		private function validate_signature($params){	
