@@ -164,12 +164,12 @@
 			return sendToAPI($this->prefix . $blog_id . '/articles/count.xml?' . $params);
 		}
 		
-		public function create($blog_id, $fields = array()){
+		public function create($blog_id, $fields){
 			$fields = array('article' => $fields);
 			return sendToAPI($this->prefix . $blog_id . "/articles" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modify($blog_id, $id, $fields = array()){
+		public function modify($blog_id, $id, $fields){
 			$fields = array('article' => $fields);
 			return sendToAPI($this->prefix . $blog_id . "/articles/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
@@ -234,17 +234,17 @@
 			$this->prefix = $site .  $this->prefix;
 		}
 		
-		public function get($blog_id = 0, $cache = false){
+		public function get($id = 0, $cache = false){
 			if ($blog_id == 0){
 				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . FORMAT), 'blog');
 				return $this->array['blog'];
 			}else{
 				if (!$cache){
-					$temp = sendToAPI($this->prefix . "/" . $blog_id . FORMAT);
+					$temp = sendToAPI($this->prefix . "/" . $id . FORMAT);
 					$this->array['blog'][$id] = $temp;
 				}
-				if (!isset($this->array['blog'][$blog_id])) throw new Exception("Blog doesn't exist in cache. Turn cache to false.");		
-				return $this->array['blog'][$blog_id];
+				if (!isset($this->array['blog'][$id])) throw new Exception("Blog doesn't exist in cache. Turn cache to false.");		
+				return $this->array['blog'][$id];
 			}
 		}
 		
@@ -280,7 +280,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $cache = false){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);			
@@ -297,7 +297,7 @@
 			}
 		}
 		
-		public function count($params = array(), $product_id = 0){
+		public function count($params = array()){
 			$params = url_encode_array($params);			
 			return sendToAPI($this->prefix . "custom_collections/count" . FORMAT . "?" . $params);
 		}
@@ -307,7 +307,7 @@
 			return sendToAPI($this->prefix . "custom_collections" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modify($id){
+		public function modify($id, $fields){
 			$fields = array('custom-collection' => $fields);
 			return sendToAPI($this->prefix . "custom_collections/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
@@ -330,7 +330,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $cache = false){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
@@ -393,7 +393,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $cache = false){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
@@ -475,7 +475,7 @@
 			return sendToAPI($this->prefix . "countries/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
-		public function delete($id){
+		public function remove($id){
 			return sendToAPI($this->prefix . "countries/" . $id . FORMAT, 'DELETE', SUCCESS, $fields);
 		}
 		
@@ -493,7 +493,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $order = 0, $product = 0){
+		public function get($id = 0, $order = 0, $product = 0, $params = array()){
 			if ($product == 0 && $order == 0){
 				if ($event_id == 0){
 					$params = url_encode_array($params);
@@ -526,7 +526,7 @@
 		}
 	}
 	
-	class Fullfillment{
+	class Fulfillment{
 		private $prefix = "/orders/";
 		private $array = array();
 		
@@ -538,37 +538,37 @@
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/fullfillments" . FORMAT . "?" . $params), 'fullfillment');
+					$this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/fulfillments" . FORMAT . "?" . $params), 'fulfillment');
 				}			
-				return $this->array['fullfillment'];
+				return $this->array['fulfillment'];
 			}else{
 				if (!$cache){
 					$temp = sendToAPI($this->prefix . $order_id . "/fullfillments/" . $id . FORMAT);
-					$this->array['fullfillment'][$id] = $temp;
+					$this->array['fulfillment'][$id] = $temp;
 				}			
-				if (!isset($this->array['fullfillment'][$id])) throw new Exception("Fullfillment not in cache. Set cache to false.");		
-				return $this->array['fullfillent'][$id];
+				if (!isset($this->array['fulfillment'][$id])) throw new Exception("Fulfillment not in cache. Set cache to false.");		
+				return $this->array['fulfillment'][$id];
 			}
 		}
 		
 		public function count($order_id, $params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . $order_id . "/fullfillments/count" . FORMAT . "?" . $params);
+			return sendToAPI($this->prefix . $order_id . "/fulfillments/count" . FORMAT . "?" . $params);
 		}
 		
 		public function create($order_id, $fields){
-			$fields = array('fullfillment' => $fields);
-			return sendToAPI($this->prefix . $order_id . "/fullfillments" . FORMAT, 'POST', CREATED, $fields);
+			$fields = array('fulfillment' => $fields);
+			return sendToAPI($this->prefix . $order_id . "/fulfillments" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function fullfill($order_id, $id, $fields){
-			$fields = array('fullfillment' => $fields);
-			return sendToAPI($this->prefix . $order_id . "/fullfillments" . FORMAT, 'POST', CREATED, $fields);
+		public function fulfill($order_id, $id, $fields){
+			$fields = array('fulfillment' => $fields);
+			return sendToAPI($this->prefix . $order_id . "/fulfillments" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
 		public function modify($order_id, $id, $fields){
 			$fields = array('article' => $fields);
-			return sendToAPI($this->prefix . $order_id . "/fullfillments/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
+			return sendToAPI($this->prefix . $order_id . "/fulfillments/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
 		
 		public function __destruct(){
@@ -633,7 +633,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $cache = false){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
@@ -687,7 +687,7 @@
 			$this->prefix = $site . $this->prefix;		
 		}
 		
-		public function get($id = 0, $cache = false, $params = array()){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				$params = url_encode_array($params);
 				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "pages" . FORMAT . "?" . $params), 'page');
@@ -734,7 +734,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $collection_id = 0, $cache = false){
+		public function get($id = 0, $collection_id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
@@ -752,17 +752,17 @@
 			}
 		}
 		
-		public function count($params = array(), $collection_id = 0){
+		public function count($collection_id = 0, $params = array()){
 			$params = url_encode_array($params);
 			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count.xml?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count" . FORMAT . "?" . $params);
 		}
 				
-		public function create(){
+		public function create($fields){
 			$fields = array('product' => $fields);
 			return sendToAPI($this->prefix . "product" . FORMAT, 'POST', CREATED, $fields);
 		}
 		
-		public function modify($id){
+		public function modify($id, $fields){
 			$fields = array('product' => $fields);
 			return sendToAPI($this->prefix . "products/" . $id . FORMAT, 'PUT', SUCCESS, $fields);
 		}
@@ -897,7 +897,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params = array(), $id = 0, $cache = false){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
@@ -914,7 +914,8 @@
 			}
 		}
 		
-		public function count($params){
+		public function count($params = array()){
+			$params = url_encode_array($params);
 			return sendToAPI($this->prefix . "redirects/count" . FORMAT . "?" . $params);
 		}
 		
@@ -940,16 +941,17 @@
 	
 	class Shop{
 		private $prefix = "/";
-		public $shop = array();
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
-			$this->shop = sendToAPI($this->prefix . "shop" . FORMAT);
+		}
+		
+		public function get(){
+			return sendToAPI($this->prefix . "shop" . FORMAT);
 		}
 		
 		public function __destruct(){
 			unset($this->prefix);
-			unset($this->shop);
 		}
 	}
 	
@@ -961,7 +963,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($params =  array(), $id = 0, $cache = false){
+		public function get($id = 0, $params =  array(), $cache = false){
 			if ($id == 0){
 				if (!$cache){
 					$params = url_encode_array($params);
@@ -1048,7 +1050,7 @@
 			$this->prefix = $site . $this->prefix;
 		}
 		
-		public function get($cache = false, $id = 0, $params = array()){
+		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks" . FORMAT . "?" . $params), 'webhook');
 				return $this->array['webhok'];
@@ -1067,7 +1069,7 @@
 			return $xmlObj->resultArray();
 		}
 		
-		public function create(){
+		public function create($fields){
 			$fields = array('webhook' => $fields);
 			return sendToAPI($this->prefix . "webhooks" . FORMAT, 'POST', CREATED, $fields);
 		}
@@ -1299,7 +1301,7 @@
 		public function recurseXML($xml, &$array){ 
 	        $children = $xml->children(); 
 	        $executed = false;
-
+
 	        foreach ($children as $k => $v){ 
 				if (is_array($array)){
 	            	if (array_key_exists($k , $array)){ 		
@@ -1333,4 +1335,4 @@
 			empty($this->ch);			
 		}
 	}
-?>
+?>∂
