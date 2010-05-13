@@ -1,14 +1,15 @@
 <?php
-	include('lib/shopify_api.php');
-	
+	ini_set('display_errors', 1); 
+	error_reporting(E_ALL);
 	if (!file_exists('lib/shopify_api_config.php')) die('lib/shopify_api_config.php is missing!');
 	include('lib/shopify_api_config.php');
+	include('lib/shopify_api.php');
 	if (!defined('API_KEY') || !defined('SECRET') || isEmpty(API_KEY) || isEmpty(SECRET)) die('Both constants API_KEY and SECRET must be defined in the config file.');
+
 		
 	/* GET VARIABLES */
 	$url = (isset($_GET['shop'])) ? mysql_escape_string($_GET['shop']) : '';
 	$token = (isset($_GET['t'])) ? mysql_escape_string($_GET['t']) : '';
-	$timestamp = (isset($_GET['timestamp'])) ? mysql_escape_string($_GET['timestamp']) : '';
 	$signature = (isset($_GET['signature'])) ? mysql_escape_string($_GET['signature']) : '';
 	$params = array('timestamp' => $timestamp, 'signature' => $signature);
 	$id = (is_numeric($_GET['id']) && isset($_GET['id'])) ? $_GET['id'] : 0;
@@ -23,7 +24,6 @@
 		shop		varchar(255)
 		token		varchar(32)
 		signature	varchar(32)
-		timestamp	int(11)
 	*/
 
 	$conn = mysql_connect('127.0.0.1', 'root', '');
@@ -36,7 +36,6 @@
 		$result = mysql_fetch_array($result);
 		$url = $result['shop'];
 		$token = $result['token'];
-		$timestamp = $result['timestamp'];
 		$signature = $result['signature'];
 	}else{
 		$check = "SELECT * FROM authorized_shops WHERE shop = '$url'";
@@ -45,10 +44,9 @@
 			$result = mysql_fetch_array($result);
 			$url = $result['shop'];
 			$token = $result['token'];
-			$timestamp = $result['timestamp'];
 			$signature = $result['signature'];
-		}else{		
-			$query = "INSERT INTO authorized_shops (shop, token, signature, timestamp) VALUES ('$url', '$token', '$signature', $timestamp)";
+		}else{
+			$query = "INSERT INTO authorized_shops (shop, token, signature) VALUES ('$url', '$token', '$signature')";
 			$result = mysql_query($query);
 			if (!$result) die(mysql_error().'<br />LINE: ' . __LINE__);
 		}

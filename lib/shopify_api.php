@@ -3,7 +3,7 @@
 	Shopify PHP API
 	Created: May 4th, 2010
 	Modified: May 13th, 2010
-	Version: 1.20100513.2
+	Version: 1.20100513.4
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -70,6 +70,16 @@
 		$data = $ch->send($url, $request, $xml);
 		if ($data[0] == $successCode) return $ch->loadString($data[1]);					
 		return $data[0]; //returns the HTTP Code (200, 201 etc) if the expected $successCode was not met
+	}
+	
+	function gzdecode($data){
+		$g = tempnam('/tmp','ff');
+		@file_put_contents($g, $data);
+		ob_start();
+		readgzfile($g);
+		$d = ob_get_clean();
+		unlink($g);
+		return $d;
 	}
 
 	class ApplicationCharge{
@@ -235,7 +245,7 @@
 		}
 		
 		public function get($id = 0, $cache = false){
-			if ($blog_id == 0){
+			if ($id == 0){
 				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . FORMAT), 'blog');
 				return $this->array['blog'];
 			}else{
@@ -1108,7 +1118,7 @@
 		public $country;
 		public $custom_collection;
 		public $event;
-		public $fullfillment;
+		public $fulfillment;
 		public $metafield;
 		public $order;
 		public $page;
@@ -1151,7 +1161,7 @@
 				$this->country 						= new Country($this->site());
 				$this->custom_collection 			= new CustomCollection($this->site());
 				$this->event 						= new Event($this->site());
-				$this->fullfillment					= new Fullfillment($this->site());
+				$this->fulfillment					= new Fulfillment($this->site());
 				$this->metafield 					= new Metafield($this->site());
 				$this->order 						= new Order($this->site());
 				$this->page 						= new Page($this->site());
@@ -1198,7 +1208,7 @@
 			unset($this->country);
 			unset($this->custom_collection);
 			unset($this->event);
-			unset($this->fullfillment);
+			unset($this->fulfillment);
 			unset($this->metafield);
 			unset($this->order);
 			unset($this->page);
@@ -1264,7 +1274,7 @@
 				CURLOPT_HEADER => 0,
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_CUSTOMREQUEST => $request,
-//				CURLOPT_HTTPHEADER => $headers
+				CURLOPT_HTTPHEADER => $headers
 			);
 			
 			if ($request != "GET"){ 
@@ -1274,7 +1284,7 @@
 			
 			curl_setopt_array($this->ch, $options);
 			curl_exec($this->ch);
-			$data = curl_multi_getcontent($this->ch);
+			$data = ($headers[0] != "Accept-Encoding: gzip") ? curl_multi_getcontent($this->ch) : gzdecode(curl_multi_getcontent($this->ch));
 			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 			curl_close($this->ch);
 			
@@ -1299,7 +1309,7 @@
 		public function recurseXML($xml, &$array){ 
 	        $children = $xml->children(); 
 	        $executed = false;
-
+
 	        foreach ($children as $k => $v){ 
 				if (is_array($array)){
 	            	if (array_key_exists($k , $array)){ 		
@@ -1333,4 +1343,4 @@
 			empty($this->ch);			
 		}
 	}
-?>∂
+?>
