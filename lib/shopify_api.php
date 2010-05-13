@@ -3,7 +3,7 @@
 	Shopify PHP API
 	Created: May 4th, 2010
 	Modified: May 13th, 2010
-	Version: 1.20100513.1
+	Version: 1.20100513.2
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -1093,7 +1093,6 @@
 		private $api_key;
 		private $secret;
 		private $protocol = 'https';
-		private $format;
 		
 		private $url;
 		private $token;
@@ -1127,12 +1126,11 @@
 			BEGIN PUBLIC
 		*/
 		
-		public function __construct($url, $token = '', $api_key, $secret, $params = array(), $format = 'xml'){
+		public function __construct($url, $token = '', $api_key, $secret, $params = array()){
 			$this->url = $url;
 			$this->token = (isEmpty($token)) ? $url : $token;
 			$this->api_key = $api_key;
 			$this->secret = $secret;
-			$this->format = $format;
 			if (isset($params['signature'])){
 				$timestamp = $params['timestamp'];
 				$expireTime = time() - (24 * 86400);
