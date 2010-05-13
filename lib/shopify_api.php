@@ -2,8 +2,8 @@
 /*
 	Shopify PHP API
 	Created: May 4th, 2010
-	Modified: May 12th, 2010
-	Version: 1.20100512
+	Modified: May 13th, 2010
+	Version: 1.20100513.1
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -449,7 +449,7 @@
 		
 		public function get($id = 0, $cache = false){
 			if ($id == 0){
-				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "countries" . FORMAT . "?"), 'country');
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . "countries" . FORMAT), 'country');
 				return $this->array['country'];
 			}else{
 				if (!$cache){
@@ -462,7 +462,7 @@
 		}
 		
 		public function count(){
-			return sendToAPI($this->prefix . "countries/count" . FORMAT . "?");
+			return sendToAPI($this->prefix . "countries/count" . FORMAT);
 		}
 		
 		public function create($fields){
@@ -543,7 +543,7 @@
 				return $this->array['fulfillment'];
 			}else{
 				if (!$cache){
-					$temp = sendToAPI($this->prefix . $order_id . "/fullfillments/" . $id . FORMAT);
+					$temp = sendToAPI($this->prefix . $order_id . "/fulfillments/" . $id . FORMAT);
 					$this->array['fulfillment'][$id] = $temp;
 				}			
 				if (!isset($this->array['fulfillment'][$id])) throw new Exception("Fulfillment not in cache. Set cache to false.");		
@@ -786,7 +786,7 @@
 		}
 		
 		public function get($product_id, $cache = false){
-			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $product_id . "/images" . FORMAT . "?"), 'image');
+			if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $product_id . "/images" . FORMAT), 'image');
 			return $this->array['image'];
 		}
 		
@@ -828,7 +828,7 @@
 		}
 		
 		public function count($product_id){
-			return sendToAPI($this->prefix . $product_id . "/variants/count" . FORMAT . "?");
+			return sendToAPI($this->prefix . $product_id . "/variants/count" . FORMAT);
 		}
 		
 		public function create($product_id, $fields){
@@ -862,7 +862,7 @@
 		
 		public function get($country_id, $id = 0, $cache = false){
 			if ($id == 0){
-				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $country_id . "/provinces" . FORMAT . "?"), 'pronvince');
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $country_id . "/provinces" . FORMAT), 'pronvince');
 				return $this->array['province'];
 			}else{
 				if (!$cache){
@@ -875,7 +875,7 @@
 		}
 		
 		public function count($country_id){
-			return sendToAPI($this->prefix . $country_id . "/provinces/count" . FORMAT . "?");
+			return sendToAPI($this->prefix . $country_id . "/provinces/count" . FORMAT);
 		}
 		
 		public function modify($country_id, $id, $fields){
@@ -1015,7 +1015,7 @@
 		
 		public function get($order_id, $id = 0, $cache = false){
 			if ($id == 0){
-				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/transactions" . FORMAT . "?"), 'transaction');			
+				if (!$cache) $this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/transactions" . FORMAT), 'transaction');			
 				return $this->array['transaction'];
 			}else{
 				if (!$cache){
@@ -1028,7 +1028,7 @@
 		}
 		
 		public function count($order_id){
-			return sendToAPI($this->prefix . $order_id . "/transactions/count" . FORMAT . "?");
+			return sendToAPI($this->prefix . $order_id . "/transactions/count" . FORMAT);
 		}
 
 		public function create($order_id, $fields){
