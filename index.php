@@ -1,6 +1,7 @@
 <?php
 	ini_set('display_errors', 1); 
 	error_reporting(E_ALL);
+	
 	if (!file_exists('lib/shopify_api_config.php')) die('lib/shopify_api_config.php is missing!');
 	include('lib/shopify_api_config.php');
 	include('lib/shopify_api.php');
@@ -10,9 +11,10 @@
 	/* GET VARIABLES */
 	$url = (isset($_GET['shop'])) ? mysql_escape_string($_GET['shop']) : '';
 	$token = (isset($_GET['t'])) ? mysql_escape_string($_GET['t']) : '';
+	$timestamp = (isset($_GET['timestamp'])) ? mysql_escape_string($_GET['timestamp']) : '';
 	$signature = (isset($_GET['signature'])) ? mysql_escape_string($_GET['signature']) : '';
 	$params = array('timestamp' => $timestamp, 'signature' => $signature);
-	$id = (is_numeric($_GET['id']) && isset($_GET['id'])) ? $_GET['id'] : 0;
+	$id = (isset($_GET['id']) && is_numeric($_GET['id'])) ? $_GET['id'] : 0;
 	
 	/*
 		This was done for testing purposes. A table was created to store shop authorizations.
@@ -57,13 +59,15 @@
 		Step 1:
 		Create a new Shopify API object with the $url, $token, $api_key, and $secret, and [$params]
 		
-		This will automatically create a session to the Shopify website. You will then be able to make calls to
-		the Shopify API.
+		You must first ping the shop auth URL if you have not. You can do this by using Session::create_permission_url()
+		Your application's Return URL will then be pinged with the shop, token, signature and timestamp.
+		
+		After this authorization is done you can then make requests to the API.
 	*/
 	$api = new Session($url, $token, API_KEY, SECRET);
 	
 	//if the Shopify connection is valid
 	if ($api->valid()){
-		print_r($api->blog->get());
+		
 	}
 ?>
