@@ -895,7 +895,7 @@
 		
 		public function get($country_id, $id = 0, $cache = false){
 			if ($id == 0){
-				if (!$cache || !isset($this->array['province'])) $this->array = organizeArray(sendToAPI($this->prefix . $country_id . "/provinces"), 'pronvince');
+				if (!$cache || !isset($this->array['province'])) $this->array = organizeArray(sendToAPI($this->prefix . $country_id . "/provinces"), 'province');
 				return $this->array['province'];
 			}else{
 				if (!$cache || !isset($this->array['province'][$id])){
