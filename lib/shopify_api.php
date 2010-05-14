@@ -2,8 +2,8 @@
 /*
 	Shopify PHP API
 	Created: May 4th, 2010
-	Modified: May 13th, 2010
-	Version: 1.20100513.5
+	Modified: May 14th, 2010
+	Version: 1.20100514.2
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
@@ -25,7 +25,9 @@
 		This is done so that traversing the result is easier to manipulate by setting the index
 		of returned data to the actual ID of the record
 	*/
-	function organizeArray($array, $type){		
+	function organizeArray($array, $type){
+		if (!is_array($array)) return array($type => array());
+			
 		if (FORMAT == "json"){
 			if (isset($array[$type . 's'])){
 				$array[$type] = $array[$type . 's'];
@@ -65,24 +67,24 @@
 	}
 	
 	function sendToAPI($url, $request = 'GET', $xml = array()){
-		if (substr_count($url, '?') > 0){
-			$url = str_replace('?', '.' . FORMAT . '?', $url);
+		if ($request != "GET"){
+			if (substr_count($url, '?') > 0){
+				$url = str_replace('?', '.' . FORMAT . '?', $url);
+			}else{
+				$url = $url . '.' . FORMAT;
+			}
 		}else{
-			$url = $url . '.' . FORMAT;
+			if (substr_count($url, '?') > 0){
+				$url = str_replace('?', '.xml?', $url);
+			}else{
+				$url = $url . '.xml';
+			}
 		}
 
 		$xml = arrayToXML($xml);
 		$ch = new miniCURL();
-		$data = $ch->send($url, $request, $xml);
-		
-		if ($data[0] < 400){
-			return $ch->loadString($data[1]);
-		}else{
-			if ($data[0] == 404) return "404: File not found.";
-			if ($data[0] == 403) return "403: Forbidden.";
-			if ($data[0] == 500) return "500: Server Error.";
-			return $data[0];
-		}
+		$data = $ch->send($url, $request, $xml);	
+		return $ch->loadString($data);
 	}
 	
 	function gzdecode($data){
@@ -159,9 +161,11 @@
 	class Article{
 		private $prefix = "/blogs/";
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
+			$this->metafield = new Metafield($site, "articles");
 		}
 		
 		public function get($blog_id, $article_id = 0, $cache = false, $params = array()){
@@ -183,7 +187,7 @@
 		
 		public function count($blog_id, $params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . $blog_id . "/articles/count" . "?" . $params);
+			return sendToAPI($this->prefix . $blog_id . "/articles/count?" . $params);
 		}
 		
 		public function create($blog_id, $fields){
@@ -203,6 +207,7 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafield);
 		}
 	}
 	
@@ -250,9 +255,11 @@
 	class Blog{
 		private $prefix = "/blogs";
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
 			$this->prefix = $site .  $this->prefix;
+			$this->metafield = new Metafield($site, "blogs");
 		}
 		
 		public function get($id = 0, $cache = false){
@@ -289,22 +296,25 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafield);
 		}
 	}
 	
 	class CustomCollection{
 		private $prefix = "/";	
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
+			$this->metafield = new Metafield($site, "custom_collections");
 		}
 		
 		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache || !isset($this->array['custom-collection'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . "custom_collections" . "?" . $params), 'custom-collection');
+					$this->array = organizeArray(sendToAPI($this->prefix . "custom_collections?" . $params), 'custom-collection');
 				}			
 				return $this->array['custom-collection'];
 			}else{
@@ -318,7 +328,7 @@
 		
 		public function count($params = array()){
 			$params = url_encode_array($params);			
-			return sendToAPI($this->prefix . "custom_collections/count" . "?" . $params);
+			return sendToAPI($this->prefix . "custom_collections/count?" . $params);
 		}
 		
 		public function create($fields){
@@ -338,6 +348,7 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafield);
 		}
 	}
 	
@@ -353,7 +364,7 @@
 			if ($id == 0){
 				if (!$cache || !isset($this->array['collect'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . "collects" . "?" . $params), 'collect');
+					$this->array = organizeArray(sendToAPI($this->prefix . "collects?" . $params), 'collect');
 				}			
 				return $this->array['collect'];
 			}else{
@@ -362,12 +373,12 @@
 				if (!$cache || !isset($this->array['collect'][$id])){
 					$params = url_encode_array($params);
 					if ($id > 0){
-						$temp = sendToAPI($this->prefix . "collects/" . $id . "" . "?" . $params);
+						$temp = sendToAPI($this->prefix . "collects/" . $id . "?" . $params);
 						$this->array['collect'][$id] = $temp;
 						$collect = $temp;
 					}else{
 						if (isset($params['product_id']) && isset($params['collection_id'])){
-							$temp = sendToAPI($this->prefix . "/collects" . "?" . $params);
+							$temp = sendToAPI($this->prefix . "/collects?" . $params);
 
 							if (isset($temp['collect'][0])){
 								$id = $temp['collect'][0]['id'];
@@ -386,7 +397,7 @@
 		
 		public function count($params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "collects" . "?" . $params);
+			return sendToAPI($this->prefix . "collects?" . $params);
 		}
 		
 		public function create($fields){
@@ -416,7 +427,7 @@
 			if ($id == 0){
 				if (!$cache || !isset($this->array['comment'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . "comments" . "?" . $params), 'comment');
+					$this->array = organizeArray(sendToAPI($this->prefix . "comments?" . $params), 'comment');
 				}			
 				return $this->array['comment'];
 			}else{
@@ -430,7 +441,7 @@
 		
 		public function count($params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "comments/count" . "?" . $params);
+			return sendToAPI($this->prefix . "comments/count?" . $params);
 		}
 		
 		public function create($fields){
@@ -514,7 +525,7 @@
 			if ($product == 0 && $order == 0){
 				if ($event_id == 0){
 					$params = url_encode_array($params);
-					$this->array = organizrArray(sendToAPI($this->prefix . "events" . "?" . $params), 'event');			
+					$this->array = organizrArray(sendToAPI($this->prefix . "events?" . $params), 'event');			
 					return $this->array['event'];
 				}else{
 					if (!$cache){
@@ -527,12 +538,12 @@
 			}
 			else if ($product > 0 && $order == 0){
 				$params = url_encode_array($params);			
-				$this->array = organizeArray(sendToAPI($this->prefix . "products/" . $id . "/events" . "?" . $params), 'event');			
+				$this->array = organizeArray(sendToAPI($this->prefix . "products/" . $id . "/events?" . $params), 'event');			
 				return $this->array['event'];
 			}
 			else if ($product == 0 && $order > 0){
 				$params = url_encode_array($params);
-				$this->array = organizeArray(sendToAPI($this->prefix . "orders/" . $id . "/events" . "?" . $params), 'event');			
+				$this->array = organizeArray(sendToAPI($this->prefix . "orders/" . $id . "/events?" . $params), 'event');			
 				return $this->array['event'];
 			}
 		}
@@ -555,7 +566,7 @@
 			if ($id == 0){
 				if (!$cache || !isset($this->array['fulfillment'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/fulfillments" . "?" . $params), 'fulfillment');
+					$this->array = organizeArray(sendToAPI($this->prefix . $order_id . "/fulfillments?" . $params), 'fulfillment');
 				}			
 				return $this->array['fulfillment'];
 			}else{
@@ -569,7 +580,7 @@
 		
 		public function count($order_id, $params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . $order_id . "/fulfillments/count" . "?" . $params);
+			return sendToAPI($this->prefix . $order_id . "/fulfillments/count?" . $params);
 		}
 		
 		public function create($order_id, $fields){
@@ -595,64 +606,67 @@
 	
 	class Metafield{
 		private $prefix = "/";
+		private $object = "";
 		private $array;
 		
-		public function __construct($site){
+		public function __construct($site, $object){
 			$this->prefix = $site . $this->prefix;
+			if (!isEmpty($object)) $this->prefix .= $object . "/";
+			$this->object = $object;
 		}
 		
-		public function get($product_id = 0, $id = 0, $params = array(), $cache = false){
-			if ($product_id == 0){
-				if (!$cache || !isset($this->array['metafield'])){
-					$params = url_encode_array($params);
-					$xmlObj = ($product_id > 0) ? sendToAPI($this->prefix . "metafields" . "?" . $params) : sendToAPI($this->prefix . "products/" . $this->product_id . "/metafields" . "?" . $params);				
-					$this->array = organizeArray($xmlObj, 'metafield');
-				}			
+		public function get($id = 0, $params = array(), $cache = false){
+			$params = url_encode_array($params);
+			if ($id == 0 && isEmpty($this->object)){
+				if (!$cache || !isset($this->array['metafield'])) $this->array = organizeArray(sendToAPI($this->prefix . "metafields?" . $params, 'GET'), 'metafield');
 				return $this->array['metafield'];
 			}else{
-				if ($id == 0) throw new Exception("You must have a product and metafield id.");
+				if ($id == 0) throw new Exception("Must provide an object id");
 				if (!$cache || !isset($this->array['metafield'][$id])){
-					$temp = sendToAPI($this->prefix . "products/" . $product_id . "/metafields/" . $id);
-					$this->array['metafield'][$id] = $temp;
+					$temp = sendToAPI($this->prefix . $id . "/metafields");
+					$this->array['metafield'][$temp['metafield']['id']] = $temp['metafield'];
 				}
-				return $this->array['metafield'][$id];
+				
+				return $this->array['metafield'][$temp['metafield']['id']];
 			}
 		}
 		
-		public function create($product_id, $fields){
+		public function create($object_id, $fields){
 			$fields = array('metafield' => $fields);
-			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $product_id . "/metafields", 'POST', $fields) : sendToAPI($this->prefix . "metafields", 'POST', $fields);
+			return ($object_id > 0) ? sendToAPI($this->prefix . $object_id . "/metafields", 'POST', $fields) : sendToAPI($this->prefix . "metafields", 'POST', $fields);
 		}
 		
-		public function modify($product_id, $id, $fields){
+		public function modify($object_id, $id, $fields){
 			$fields = array('metafield' => $fields);
-			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $product_id . "/metafields/" . $id, 'PUT') : sendToAPI($this->prefix . "metafields/" . $id, 'PUT');
+			return ($object_id > 0) ? sendToAPI($this->prefix . $object_id . "/metafields/" . $id, 'PUT', $fields) : sendToAPI($this->prefix . "metafields/" . $id, 'PUT', $fields);
 		}
 		
-		public function remove($product_id, $id){
-			return ($product_id > 0) ? sendToAPI($this->prefix . "products/" . $product_id . "/metafields/" . $id, 'DELETE') : sendToAPI($this->prefix . "metafields/" . $id, 'DELETE');
+		public function remove($object_id, $id){
+			return ($object_id > 0) ? sendToAPI($this->prefix . $object_id . "/metafields/" . $id, 'DELETE') : sendToAPI($this->prefix . "metafields/" . $id, 'DELETE');
 		}
 		
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
-			unset($this->product_id);
+			unset($this->object);
 		}
 	}
 	
 	class Order{
 		private $prefix = "/";
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
+			$metafield = new Metafield($site, "orders");
 		}
 		
 		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache || !isset($this->array['order'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . "orders" . "?" . $params), 'order');
+					$this->array = organizeArray(sendToAPI($this->prefix . "orders?" . $params), 'order');
 				}			
 				return $this->array['order'];
 			}else{
@@ -666,7 +680,7 @@
 		
 		public function count($params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "orders/count" . "?" . $params);
+			return sendToAPI($this->prefix . "orders/count?" . $params);
 		}
 		
 		public function open($id){
@@ -690,21 +704,24 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafield);
 		}
 	}
 	
 	class Page{
 		private $prefix = "/";
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
-			$this->prefix = $site . $this->prefix;		
+			$this->prefix = $site . $this->prefix;
+			$this->metafield = new Metafield($site, "pages");
 		}
 		
 		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				$params = url_encode_array($params);
-				if (!$cache || !isset($this->array['page'])) $this->array = organizeArray(sendToAPI($this->prefix . "pages" . "?" . $params), 'page');
+				if (!$cache || !isset($this->array['page'])) $this->array = organizeArray(sendToAPI($this->prefix . "pages?" . $params), 'page');
 				return $this->array['page'];
 			}else{
 				if (!$cache || !isset($this->array['page'][$id])){
@@ -716,7 +733,7 @@
 		}
 		
 		public function count($params = array()){
-			return sendToAPI($this->prefix . "pages/count" . "?" . $params);
+			return sendToAPI($this->prefix . "pages/count?" . $params);
 		}
 		
 		public function create($fields){
@@ -736,22 +753,25 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafields);
 		}
 	}
 	
 	class Product{
 		private $prefix = "/";
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
+			$this->metafield = new Metafield($site, "products");
 		}
 		
 		public function get($id = 0, $collection_id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache || !isset($this->array['product'])){
 					$params = url_encode_array($params);
-					$xmlObj = ($collection_id > 0) ? sendToAPI($this->prefix . "products" . "?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products" . "?" . $params);
+					$xmlObj = ($collection_id > 0) ? sendToAPI($this->prefix . "products" . "?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products?" . $params);
 					$this->array = organizeArray($xmlObj, 'product');
 				}			
 				return $this->array['product'];
@@ -766,7 +786,7 @@
 		
 		public function count($collection_id = 0, $params = array()){
 			$params = url_encode_array($params);
-			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count" . "?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count" . "?" . $params);
+			return ($collection_id > 0) ? sendToAPI($this->prefix . "products/count" . "?collection_id=" . $collection_id . "&" . $params) : sendToAPI($this->prefix . "products/count?" . $params);
 		}
 				
 		public function create($fields){
@@ -786,6 +806,7 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafield);
 		}
 	}
 	
@@ -820,9 +841,11 @@
 	class ProductVariant{
 		private $prefix = "/products/";
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
-			$this->prefix = $site . $this->prefix;;
+			$this->prefix = $site . $this->prefix;
+			$this->metafield = new Metafield($site, "variants");
 		}
 		
 		public function get($product_id, $id = 0, $cache = false){
@@ -910,7 +933,7 @@
 			if ($id == 0){
 				if (!$cache || !isset($this->array['redirect'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . "redirects" . "?" . $params), 'redirect');
+					$this->array = organizeArray(sendToAPI($this->prefix . "redirects?" . $params), 'redirect');
 				}		
 				return $this->array['redirect'];
 			}else{
@@ -924,7 +947,7 @@
 		
 		public function count($params = array()){
 			$params = url_encode_array($params);
-			return sendToAPI($this->prefix . "redirects/count" . "?" . $params);
+			return sendToAPI($this->prefix . "redirects/count?" . $params);
 		}
 		
 		public function create($fields){
@@ -966,16 +989,18 @@
 	class SmartCollection{
 		private $prefix = "/";	
 		private $array = array();
+		public $metafield;
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
+			$this->metafield = new Metafield($site, "smart_collections");
 		}
 		
 		public function get($id = 0, $params =  array(), $cache = false){
 			if ($id == 0){
 				if (!$cache || !isset($this->array['smart-collection'])){
 					$params = url_encode_array($params);
-					$this->array = organizeArray(sendToAPI($this->prefix . "smart_collections" . "?" . $params), 'smart-collection');
+					$this->array = organizeArray(sendToAPI($this->prefix . "smart_collections?" . $params), 'smart-collection');
 				}
 				return $this->array['smart-collection'];
 			}else{
@@ -989,7 +1014,7 @@
 		
 		public function count($params = array()){
 			$params = url_encode_array($params);			
-			return sendToAPI($this->prefix . "smart_collections/count" . "?" . $params);			
+			return sendToAPI($this->prefix . "smart_collections/count?" . $params);			
 		}
 		
 		public function create($fields){
@@ -1009,6 +1034,7 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
+			unset($this->metafield);
 		}		
 	}
 	
@@ -1058,7 +1084,7 @@
 		
 		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
-				if (!$cache || !isset($this->array['webhook'])) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks" . "?" . $params), 'webhook');
+				if (!$cache || !isset($this->array['webhook'])) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks?" . $params), 'webhook');
 				return $this->array['webhok'];
 			}else{
 				if (!$cache || !isset($this->array['webhook'][$id])){
@@ -1070,7 +1096,7 @@
 		}
 		
 		public function count($params = array()){
-			$xmlObj = new parser($this->prefix . "webhooks/count" . "?" . $params);
+			$xmlObj = new parser($this->prefix . "webhooks/count?" . $params);
 			return $xmlObj->resultArray();
 		}
 		
@@ -1157,7 +1183,7 @@
 				$this->custom_collection 			= new CustomCollection($this->site());
 				$this->event 						= new Event($this->site());
 				$this->fulfillment					= new Fulfillment($this->site());
-				$this->metafield 					= new Metafield($this->site());
+				$this->metafield 					= new Metafield($this->site(), "");
 				$this->order 						= new Order($this->site());
 				$this->page 						= new Page($this->site());
 				$this->product 						= new Product($this->site());
@@ -1283,7 +1309,8 @@
 			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 			curl_close($this->ch);
 			
-			return array($code, $data);
+			if ($code > 400) echo die($data);			
+			return $data;
 		}
 		
 		public function loadString($data){

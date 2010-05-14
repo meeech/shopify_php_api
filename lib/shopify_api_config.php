@@ -7,4 +7,8 @@
 	define('API_KEY', '');
 	define('SECRET', '');
 	define('FORMAT', 'xml'); // .xml || .json
+	
+	/*
+		Note that all XML tags with an _ in the tag name are returned with a - (hyphen) in JSON	
+	*/
 ?>
