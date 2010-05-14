@@ -11,3 +11,18 @@ Open up shopify_php_api/test.php and update the USERNAME consant to your usernam
 You can then access it by going to http://localhost/~YOUR_USERNAME/shopify_php_api/test/index.php
 
 You'll also need to set some values in lib/shopify_api_config.php if you wanna try *using* the API.
+
+PHP_Shopify_API_Documentation.rtf has all the documentation on the API.
+
+
+CHANGELOG
+
+1.20100514.1
+
+Several changes made to the API.
+
+- Removed all references of the FORMAT constant from URLs in sendToAPI calls and instead moved it inside the sendToAPI function.
+- Removed SUCCESS and CREATED constants and instead sendToAPI will check for the right HTTP code based on the request header
+- Test setup made easier
+- Any get method with a cache would return an empty array if cache was true and the cache was empty. If the cache is empty
+and cache is true, the API will be queried.

@@ -1,14 +1,11 @@
 <?php
-
-	require_once('/Users/'.USERNAME.'/Sites/shopify_php_api/lib/shopify_api.php'); 
-	require_once('/Users/'.USERNAME.'/Sites/shopify_php_api/lib/shopify_api_config.php');
+	require_once(str_replace('index.php', '', $_SERVER['SCRIPT_FILENAME']). '../lib/shopify_api.php'); 
+	require_once(str_replace('index.php', '', $_SERVER['SCRIPT_FILENAME']). '../lib/shopify_api_config.php');
 
 	class TestingFunctions extends UnitTestCase{		
 		function testConfiguration(){				
 			$this->assertTrue(defined('API_KEY'));
 			$this->assertTrue(defined('SECRET'));
-			$this->assertTrue(defined('CREATED'));
-			$this->assertTrue(defined('SUCCESS'));
 		}
 		
 		function testIsEmpty(){
@@ -34,7 +31,7 @@
 		
 		function testSendToAPI(){
 			//This test should return a 500 error
-			$this->assertTrue(sendToAPI('testshop.myshopify.com/admin/orders.xml', 'POST', SUCCESS) == 500);
+			$this->assertTrue(sendToAPI('testshop.myshopify.com/admin/orders.xml', 'POST') == 500);
 		}
 	}
 	
@@ -44,9 +41,8 @@
 		public function testIsValid(){
 			$this->session = new Session('', '', '', '');
 			$this->assertFalse($this->session->valid());
-			$this->session = new Session('schneider-and-sons2771.myshopify.com', '2b095d353a52bcd68709a3f72fe723af', API_KEY, SECRET);
+			$this->session = new Session('schneider-and-sons2771.myshopify.com', '31191cf000f9d1ee2bc97ddcdd5a76fd', API_KEY, SECRET);
 			$this->assertTrue($this->session->valid());
-			$this->assertTrue(!isEmpty($this->session->create_permission_url()));
 		}
 	}
 

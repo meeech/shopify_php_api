@@ -6,9 +6,5 @@
 
 	define('API_KEY', '');
 	define('SECRET', '');
-	
-	define('SUCCESS', 200);
-	define('CREATED', 201);
-	
-	define('FORMAT', '.xml'); // .xml || .json
+	define('FORMAT', 'xml'); // .xml || .json
 ?>
