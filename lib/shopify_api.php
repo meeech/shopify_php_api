@@ -143,9 +143,8 @@
 			return sendToAPI($this->prefix, 'POST', $fields);
 		}
 		
-		public function activate($id, $fields){
-			$fields = array('recurring-application-charge' => $fields);
-			return sendToAPI($this->prefix . "/" . $id . "/activate", 'PUT', $fields);
+		public function activate($id){
+			return sendToAPI($this->prefix . "/" . $id . "/activate", 'PUT');
 		}
 		
 		public function cancel($id){
@@ -173,8 +172,7 @@
 				if (!$cache || !isset($this->array['article'])){
 					$params = url_encode_array($params);
 					$this->array = organizeArray(sendToAPI($this->prefix . $blog_id . '/articles" . "?' . $params), 'article');
-				}
-			
+				}			
 				return $this->array['article'];
 			}else{
 				if (!$cache || !isset($this->array['article'][$article_id])){
