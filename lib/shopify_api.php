@@ -88,7 +88,7 @@
 	}
 	
 	function gzdecode($data){
-		$g = tempnam('/tmp','ff');
+		$g = tempnam('/tmp', 'ff');
 		@file_put_contents($g, $data);
 		ob_start();
 		readgzfile($g);
@@ -106,7 +106,7 @@
 		}
 		
 		public function get($cache = false){
-			if (!$cache || !isset($this->array['record']) == 0) $this->array = organizeArray(sendToAPI($this->prefix), 'record');
+			if (!$cache || !isset($this->array['record'])) $this->array = organizeArray(sendToAPI($this->prefix), 'record');
 			return $this->array['record'];
 		}
 		
@@ -386,7 +386,7 @@
 								$collect = $temp['collect'][0];
 							}
 						}else{
-							throw new Exception("Must specify a collect id or product_id and collection_id.");										
+							throw new Exception("Must specify a collect id or product_id and collection_id in the params array if trying to fetch a specific Collect.");										
 						}
 					}
 				}
