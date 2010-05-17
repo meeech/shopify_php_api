@@ -2,8 +2,8 @@
 /*
 	Shopify PHP API
 	Created: May 4th, 2010
-	Modified: May 14th, 2010
-	Version: 1.20100514.2
+	Modified: May 19th, 2010
+	Version: 1.20100519.1
 */
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
