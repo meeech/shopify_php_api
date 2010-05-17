@@ -28,10 +28,9 @@
 			$xml = '<?xml version="1.0" encoding="UTF-8"?><something><one>1</one><two><too>2</too></two></something>';
 			$this->assertTrue(arrayToXML($array) == $xml);
 		}
-		
-		function testSendToAPI(){
-			//This test should return a 500 error
-			$this->assertTrue(sendToAPI('testshop.myshopify.com/admin/orders.xml', 'POST') == 500);
+				
+		function testGZDecode(){
+			$this->assertTrue(gzdecode(gzencode("this is some text")) == "this is some text");
 		}
 	}
 	
