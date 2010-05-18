@@ -9,6 +9,6 @@
 	define('FORMAT', 'xml'); // xml || json
 	
 	/*
-		Note that all XML tags with an _ in the tag name are returned with a - (hyphen) in JSON	
+		Note that all XML tags with an - in the tag name are returned with a _ (underscore) in JSON	
 	*/
 ?>
