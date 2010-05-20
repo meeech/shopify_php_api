@@ -1,6 +1,6 @@
 <?php
 /*
-	Shopify PHP API
+	Shopify API in PHP
 	Created: May 4th, 2010
 	Modified: May 17th, 2010
 	Version: 1.20100517.2
