@@ -1,0 +1,19 @@
+CHANGELOG
+
+1.20100514.2
+
+- Added a public metafield variable for each necessary class to CRUD metafields for that object.
+- To get metafields for the whole shop you can use the metafield variable in the Session class. 
+- Cleaned up some URLs passed to sendToAPI
+- HTTP Code Error Handling is now down in the miniCURL class
+- If there is an HTTP Code Error returned the API will die with the content from the Shopify API
+
+
+1.20100514.1
+
+Several changes made to the API.
+
+- Removed all references of the FORMAT constant from URLs in sendToAPI calls and instead moved it inside the sendToAPI function.
+- Removed SUCCESS and CREATED constants and instead sendToAPI will check for the right HTTP code based on the request header
+- Test setup made easier
+- Any get method with a cache would return an empty array if cache was true and the cache was empty. If the cache is empty and cache is true, the API will be queried.
