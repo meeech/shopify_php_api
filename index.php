@@ -14,47 +14,7 @@
 	$timestamp = (isset($_GET['timestamp'])) ? mysql_escape_string($_GET['timestamp']) : '';
 	$signature = (isset($_GET['signature'])) ? mysql_escape_string($_GET['signature']) : '';
 	$params = array('timestamp' => $timestamp, 'signature' => $signature);
-	$id = (isset($_GET['id']) && is_numeric($_GET['id'])) ? $_GET['id'] : 0;
 	
-	/*
-		This was done for testing purposes. A table was created to store shop authorizations.
-		It allowed the API to be tested on more than one store at a time.
-		
-		Table structure
-		-authorized_shops-
-		id 			int(11)			auto_increment
-		shop		varchar(255)
-		token		varchar(32)
-		signature	varchar(32)
-	*/
-
-	$conn = mysql_connect('127.0.0.1', 'root', '');
-	mysql_select_db('php_api_test');
-	
-	if ($id > 0){
-		$query = "SELECT * FROM authorized_shops WHERE id = $id";
-		$result = mysql_query($query);
-		if (!$result) die(mysql_error().'<br />LINE: ' . __LINE__);
-		$result = mysql_fetch_array($result);
-		$url = $result['shop'];
-		$token = $result['token'];
-		$signature = $result['signature'];
-	}else{
-		$check = "SELECT * FROM authorized_shops WHERE shop = '$url'";
-		$result = mysql_query($check);
-		if (mysql_num_rows($result) > 0){
-			$result = mysql_fetch_array($result);
-			$url = $result['shop'];
-			$token = $result['token'];
-			$signature = $result['signature'];
-		}else{
-			$query = "INSERT INTO authorized_shops (shop, token, signature) VALUES ('$url', '$token', '$signature')";
-			$result = mysql_query($query);
-			if (!$result) die(mysql_error().'<br />LINE: ' . __LINE__);
-		}
-	}
-	
-	mysql_close($conn);
 	/*
 		Step 1:
 		Create a new Shopify API object with the $url, $token, $api_key, and $secret, and [$params]
@@ -68,6 +28,8 @@
 	
 	//if the Shopify connection is valid
 	if ($api->valid()){
-		
+		if (isEmpty($token)){
+			header("Location: " . $api->create_permission_url());
+		}
 	}
 ?>
