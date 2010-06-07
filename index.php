@@ -1,9 +1,6 @@
 <?php
 	ini_set('display_errors', 1); 
 	error_reporting(E_ALL);
-	
-	if (!file_exists('lib/shopify_api_config.php')) die('lib/shopify_api_config.php is missing!');
-	include('lib/shopify_api_config.php');
 	include('lib/shopify_api.php');
 	if (!defined('API_KEY') || !defined('SECRET') || isEmpty(API_KEY) || isEmpty(SECRET)) die('Both constants API_KEY and SECRET must be defined in the config file.');
 

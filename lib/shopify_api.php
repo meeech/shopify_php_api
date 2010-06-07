@@ -5,6 +5,9 @@
 	Modified: May 17th, 2010
 	Version: 1.20100517.2
 */
+
+  include('shopify_api_config.php');
+
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
 		return (strlen(trim($string)) == 0);
@@ -1326,37 +1329,38 @@
 			return $array;
 		}
 		
-		public function recurseXML($xml, &$array){ 
-	        $children = $xml->children(); 
-	        $executed = false;
+    public function recurseXML($xml, &$array){ 
+      $children = $xml->children(); 
+      $executed = false;
 
-	        foreach ($children as $k => $v){ 
-				if (is_array($array)){
-	            	if (array_key_exists($k , $array)){ 		
-	                	if (array_key_exists(0 ,$array[$k])){ 
-	                    	$i = count($array[$k]); 
-	                    	$this->recurseXML($v, $array[$k][$i]);     
-	                	}else{ 
-	                    	$tmp = $array[$k]; 
-	                    	$array[$k] = array(); 
-	                    	$array[$k][0] = $tmp; 
-	                    	$i = count($array[$k]); 
-	                    	$this->recurseXML($v, $array[$k][$i]); 
-	                	} 
-	            	}else{ 
-	                	$array[$k] = array(); 
-	                	$this->recurseXML($v, $array[$k]);    
-	            	}
+      foreach ($children as $k => $v){ 
+		    if (is_array($array)){
+      	  if (array_key_exists($k , $array)){ 		
+	        	if (array_key_exists(0 ,$array[$k])){ 
+	          	$i = count($array[$k]); 
+	          	$this->recurseXML($v, $array[$k][$i]);     
+	        	}else{ 
+	            $tmp = $array[$k]; 
+	            $array[$k] = array(); 
+	            $array[$k][0] = $tmp; 
+	            $i = count($array[$k]); 
+	            $this->recurseXML($v, $array[$k][$i]); 
+	          } 
+	        }else{ 
+	        	$array[$k] = array(); 
+	        	$this->recurseXML($v, $array[$k]);    
+	        }
 				}else{
 					$array[$k] = array(); 
-                	$this->recurseXML($v, $array[$k]);
+        	$this->recurseXML($v, $array[$k]);
 				} 
-				$executed = true; 
-	        } 
-	
-	        if (!$executed && isEmpty($children->getName())){ 
-	            $array = (string)$xml; 
-	        } 
+		    
+		    $executed = true; 
+      }
+      
+      if (!$executed && isEmpty($children->getName())){ 
+          $array = (string)$xml; 
+      } 
 		}
 		
 		public function __destruct(){

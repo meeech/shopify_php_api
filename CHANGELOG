@@ -1,5 +1,8 @@
 CHANGELOG
 
+1.20100607.1
+- Moved the include for shopify_api_config into shopify_api
+
 1.20100514.2
 
 - Added a public metafield variable for each necessary class to CRUD metafields for that object.
