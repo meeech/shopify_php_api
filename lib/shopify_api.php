@@ -660,7 +660,6 @@
 		
 		public function __construct($site){
 			$this->prefix = $site . $this->prefix;
-			$metafield = new Metafield($site, "orders");
 		}
 		
 		public function get($id = 0, $params = array(), $cache = false){
@@ -705,7 +704,6 @@
 		public function __destruct(){
 			unset($this->prefix);
 			unset($this->array);
-			unset($this->metafield);
 		}
 	}
 	
