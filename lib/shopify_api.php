@@ -17,7 +17,7 @@
 	function url_encode_array($params){
 		$string = '';
 		if (sizeof($params) > 0){
-			foreach($params as $k => $v) if (!is_array($v)) $string .= $k.'='.$v.'&';
+			foreach($params as $k => $v) if (!is_array($v)) $string .= $k.'='.str_replace(' ', '%20', $v).'&';
 			$string = substr($string, 0, strlen($string) - 1);
 		}
 		return $string;
