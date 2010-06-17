@@ -1,3 +1,7 @@
+Shopify PHP API Created by William Lang
+SimpleTest created by http://www.simpletest.org/
+
+
 To run the tests:
 
 You can then access it by going to http://path/to/your/folder/shopify_php_api/test/index.php
@@ -20,6 +24,10 @@ $api = new Session('mystore.myshopify.com', '', 'YOUR_API_KEY', 'YOUR_SECRET');
 header("Location: " $api->create_permission_url());
 
 This will send the owner of 'mystore.myshopify.com' (usually you would prompt for this information) to the permission URL needed for authentication and installation of your app. The Shopify platform will then automatically redirect the user to your application's return URL with their shop, token and signature.
+
+$shop = $_GET['url'];
+$token = $_GET['t'];
+$api = new Session($shop, $token, 'YOUR_API_KEY', 'YOUR_SECRET');
 
 Now that your user has given your application permission to read and/or write, we can ask for the products in their store:
 
