@@ -13,8 +13,8 @@
 		}
 		
 		function testURLEncodeArray(){
-			$array = array('one' => 1, 'two' => 'too', 'three' => array('blah'));
-			$this->assertTrue(url_encode_array($array) == "one=1&two=too");
+			$array = array('one' => 1, 'two' => 'to o', 'three' => array('blah'));
+			$this->assertTrue(url_encode_array($array) == "one=1&two=to%20o");
 		}
 		
 		function testOrganizeArray(){

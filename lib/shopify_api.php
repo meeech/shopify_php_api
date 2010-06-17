@@ -1084,7 +1084,7 @@
 		public function get($id = 0, $params = array(), $cache = false){
 			if ($id == 0){
 				if (!$cache || !isset($this->array['webhook'])) $this->array = organizeArray(sendToAPI($this->prefix . "webhooks?" . $params), 'webhook');
-				return $this->array['webhok'];
+				return $this->array['webhook'];
 			}else{
 				if (!$cache || !isset($this->array['webhook'][$id])){
 					$temp = sendToAPI($this->prefix . "webhooks/" . $id);
@@ -1095,8 +1095,8 @@
 		}
 		
 		public function count($params = array()){
-			$xmlObj = new parser($this->prefix . "webhooks/count?" . $params);
-			return $xmlObj->resultArray();
+		  $params = url_encode_array($params);
+		  return sendToAPI($this->prefix . "webhooks/count?" . $params);
 		}
 		
 		public function create($fields){
