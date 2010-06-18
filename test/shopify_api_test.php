@@ -1,6 +1,7 @@
 <?php
-	require_once(str_replace('index.php', '', $_SERVER['SCRIPT_FILENAME']). '../lib/shopify_api.php'); 
-	require_once(str_replace('index.php', '', $_SERVER['SCRIPT_FILENAME']). '../lib/shopify_api_config.php');
+	require_once('../lib/shopify_api.php'); 
+	require_once('../lib/shopify_api_config.php');
+	require_once('../simpletest/autorun.php');
 
 	class TestingFunctions extends UnitTestCase{		
 		function testConfiguration(){				
