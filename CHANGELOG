@@ -1,5 +1,9 @@
 CHANGELOG
 
+June 18th, 2010
+  - Added SimpleTest autorun to test/shopify_api_test.php [daniellmb]
+  - Removed test/index.php
+
 June 17th, 2010
   - Fixed a typo in Webhook
   - Fixed a bug in url_encode_array to make spaces url friendly (converted to %20)
