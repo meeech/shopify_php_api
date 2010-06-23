@@ -1127,6 +1127,7 @@
 		private $api_key;
 		private $secret;
 		private $protocol = 'https';
+		private $private = false;
 		
 		private $url;
 		private $token;
@@ -1160,11 +1161,12 @@
 			BEGIN PUBLIC
 		*/
 		
-		public function __construct($url, $token = '', $api_key, $secret, $params = array()){
+		public function __construct($url, $token = '', $api_key, $secret, $private = false, $params = array()){
 			$this->url = $url;
 			$this->token = (isEmpty($token)) ? $url : $token;
 			$this->api_key = $api_key;
 			$this->secret = $secret;
+			$this->private = $private;
 			if (isset($params['signature'])){
 				$timestamp = $params['timestamp'];
 				$expireTime = time() - (24 * 86400);
@@ -1253,7 +1255,7 @@
 		*/
 		
 		private function computed_password(){
-			return md5($this->secret . $this->token);
+			return ($this->private) ? $this->secret : md5($this->secret . $this->token);
 		}
 		
 		private function prepare_url($url){
