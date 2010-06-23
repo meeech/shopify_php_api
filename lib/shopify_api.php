@@ -700,6 +700,10 @@
 			$fields = array('order' => array('id' => $id, 'note-attributes' => array('note-attribute' => $fields)));
 			return sendToAPI($this->prefix . "orders/" . $id, 'PUT', $fields);
 		}
+		
+		public function remove($id){
+		  return sendToAPI($this->prefix . "orders/" . $id, 'DELETE');
+		}
 			
 		public function __destruct(){
 			unset($this->prefix);

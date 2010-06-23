@@ -1,5 +1,8 @@
 CHANGELOG
 
+June 23rd, 2010
+  - Added Order::remove to delete orders (missing functionality)
+
 June 18th, 2010
   - Added SimpleTest autorun to test/shopify_api_test.php [daniellmb]
   - Removed test/index.php
