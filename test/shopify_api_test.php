@@ -33,16 +33,22 @@
 		function testGZDecode(){
 			$this->assertTrue(gzdecode(gzencode("this is some text")) == "this is some text");
 		}
+		
 	}
 	
 	class TestSessionClass extends UnitTestCase{
 		private $session;
 		
-		public function testIsValid(){
+		function testIsValid(){
 			$this->session = new Session('', '', '', '');
 			$this->assertFalse($this->session->valid());
 			$this->session = new Session('schneider-and-sons2771.myshopify.com', '31191cf000f9d1ee2bc97ddcdd5a76fd', API_KEY, SECRET);
 			$this->assertTrue($this->session->valid());
+		}
+		
+		function testPrivateApp(){
+			$this->session = new Session('schneider-and-sons2771.myshopify.com', '31191cf000f9d1ee2bc97ddcdd5a76fd', API_KEY, 'this is a secret', true);
+			$this->assertTrue(substr_count($this->session->site(), 'this is a secret') > 0);
 		}
 	}
 

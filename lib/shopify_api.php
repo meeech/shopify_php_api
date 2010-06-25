@@ -407,7 +407,7 @@
 		}
 		
 		public function remove($id){
-			return sendToAPI($this->prefix . "custom_collections", 'POST', CREATED);
+			return sendToAPI($this->prefix . "custom_collections", 'DELETE');
 		}
 					
 		public function __destruct(){
@@ -505,7 +505,7 @@
 		}
 		
 		public function remove($id){
-			return sendToAPI($this->prefix . "countries/" . $id, 'DELETE', $fields);
+			return sendToAPI($this->prefix . "countries/" . $id, 'DELETE');
 		}
 		
 		public function __destruct(){
