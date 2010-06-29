@@ -1,5 +1,9 @@
 CHANGELOG
 
+June 29th, 2010
+  - Added GZIP_PATH to shopify_api_config
+  - Added GZIP_ENABLED to enable or disable gzip compression
+
 June 25th, 2010
   - Removed unnecessary parameters in Country::remove and Collect::remove
   - Added test for private applications

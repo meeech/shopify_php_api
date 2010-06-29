@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: May 17th, 2010
-	Version: 1.20100517.2
+	Modified: June 29th, 2010
+	Version: 1.20100629.1
 */
 
   include('shopify_api_config.php');
@@ -91,7 +91,7 @@
 	}
 	
 	function gzdecode($data){
-		$g = tempnam('/tmp', 'ff');
+		$g = tempnam(GZIP_PATH, 'ff');
 		@file_put_contents($g, $data);
 		ob_start();
 		readgzfile($g);
@@ -1292,10 +1292,11 @@
 			if (!function_exists('curl_init')) die("Error: cURL does not exist! Please install cURL.");
 		}
 		
-		public function send($url, $request = 'GET', $xml_payload = '', $headers = array('Accept-Encoding: gzip')){
+		public function send($url, $request = 'GET', $xml_payload = '', $headers = array()){
 			$this->ch = curl_init($url);
-		
-			// _HEADER _RETURNTRANSFER -- Return output as string including HEADER information
+			
+			if (GZIP_ENABLED) $headers[] = 'Accept-Encoding: gzip';
+			
 			$options = array(
 				CURLOPT_HEADER => 0,
 				CURLOPT_RETURNTRANSFER => 1,
@@ -1310,7 +1311,7 @@
 			
 			curl_setopt_array($this->ch, $options);
 			curl_exec($this->ch);
-			$data = ($headers[0] != "Accept-Encoding: gzip") ? curl_multi_getcontent($this->ch) : gzdecode(curl_multi_getcontent($this->ch));
+			$data = (!GZIP_ENABLED) ? curl_multi_getcontent($this->ch) : gzdecode(curl_multi_getcontent($this->ch));
 			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 			curl_close($this->ch);
 			

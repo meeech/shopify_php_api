@@ -7,10 +7,15 @@
 		function testConfiguration(){				
 			$this->assertTrue(defined('API_KEY'));
 			$this->assertTrue(defined('SECRET'));
+			$this->assertTrue(defined('GZIP_ENABLED'));
+			$this->assertTrue(defined('GZIP_PATH'));
+			$this->assertTrue(defined('FORMAT'));
 		}
 		
 		function testIsEmpty(){
 			$this->assertTrue(isEmpty(''));
+			$this->assertTrue(isEmpty('   '));
+			$this->assertTrue(!isEmpty('This is not empty.'));
 		}
 		
 		function testURLEncodeArray(){
