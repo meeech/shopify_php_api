@@ -1,5 +1,9 @@
 CHANGELOG
 
+June 30th, 2010
+  - Added SSL support options
+  - Added lib/cacert.pem to verify Shopify SSL certificates
+  
 June 29th, 2010
   - Added GZIP_PATH to shopify_api_config
   - Added GZIP_ENABLED to enable or disable gzip compression

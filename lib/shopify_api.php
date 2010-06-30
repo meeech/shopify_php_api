@@ -74,13 +74,13 @@
 			if (substr_count($url, '?') > 0){
 				$url = str_replace('?', '.' . FORMAT . '?', $url);
 			}else{
-				$url = $url . '.' . FORMAT;
+				$url .= '.' . FORMAT;
 			}
 		}else{
 			if (substr_count($url, '?') > 0){
 				$url = str_replace('?', '.xml?', $url);
 			}else{
-				$url = $url . '.xml';
+				$url .= '.xml';
 			}
 		}
 
@@ -1301,8 +1301,11 @@
 				CURLOPT_HEADER => 0,
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_CUSTOMREQUEST => $request,
+				CURLOPT_SSL_VERIFYPEER => USE_SSL,
 				CURLOPT_HTTPHEADER => $headers
 			);
+			
+			if (USE_SSL_PEM) $options[CURLOPT_CAINFO] = CA_FILE;
 			
 			if ($request != "GET"){ 
 				$options[CURLOPT_POSTFIELDS] = $xml_payload; 
@@ -1310,7 +1313,7 @@
 			}
 			
 			curl_setopt_array($this->ch, $options);
-			curl_exec($this->ch);
+			if (!curl_exec($this->ch)) die(curl_error($this->ch));
 			$data = (!GZIP_ENABLED) ? curl_multi_getcontent($this->ch) : gzdecode(curl_multi_getcontent($this->ch));
 			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 			curl_close($this->ch);
