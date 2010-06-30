@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: June 29th, 2010
-	Version: 1.20100629.1
+	Modified: June 30th, 2010
+	Version: 1.20100630.1
 */
 
   include('shopify_api_config.php');

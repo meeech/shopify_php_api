@@ -24,7 +24,7 @@ You can then access it by going to http://www.yourdomain.com/shopify_php_api/tes
 Authentication is easy to do. The API will generate all the necessary URLs your application needs to authenticate.
 
     $api = new Session('mystore.myshopify.com', '', 'YOUR_API_KEY', 'YOUR_SECRET');
-    header("Location: " $api->create_permission_url());
+    header("Location: " . $api->create_permission_url());
 
 This will send the owner of 'mystore.myshopify.com' (usually you would prompt for this information) to the permission URL needed for authentication and installation of your app. The Shopify platform will then automatically redirect the user to your application's return URL with their shop, token and signature.
 
@@ -57,6 +57,9 @@ To update a product (if your application has write permissions), you can use the
     
 ## REPORTING BUGS
 Email william [at] shopify [dot] com
+
+## FREQUENTLY ASKED QUESTIONS
+http://wiki.shopify.com/PHP_API_FAQ
 
 ## COPYRIGHT
 jadedPixel / Shopify
