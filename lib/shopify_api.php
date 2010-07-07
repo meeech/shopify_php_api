@@ -30,6 +30,7 @@
 	*/
 	function organizeArray($array, $type){
 		if (!is_array($array)) return array($type => array());
+		if (isset($array['error'])) return array($type => $array);
 			
 		if (FORMAT == "json"){
 			if (isset($array[$type . 's'])){
@@ -1318,7 +1319,6 @@
 			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 			curl_close($this->ch);
 			
-			if ($code > 400) echo die($data);			
 			return $data;
 		}
 		
@@ -1326,9 +1326,14 @@
 			$array = array();
 				
 			if (FORMAT == "xml"){
-				$xml = simplexml_load_string($data);
-				$this->recurseXML($xml, $array);
-			}
+        if (preg_match("/\<[html]\>/", $data) == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
+          if (!function_exists('simplexml_load_string')) die("SimpleXML library not installed. Either change format to .json or upgrade your version of PHP");
+				  $xml = simplexml_load_string($data);
+				  $this->recurseXML($xml, $array);
+			  }else{
+			    $array = array('error' => $data);
+		    }
+      }
 			else if (FORMAT == "json"){
 				if (!function_exists('json_decode')) die("json library not installed. Either change format to .xml or upgrade your version of PHP");
 				$array = json_decode($data, true);
