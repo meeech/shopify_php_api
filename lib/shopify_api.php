@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: June 30th, 2010
-	Version: 1.20100630.1
+	Modified: June 14th, 2010
+	Version: 1.20100714.1
 */
 
   include('shopify_api_config.php');
@@ -291,7 +291,7 @@
 			return sendToAPI($this->prefix . "/" . $id, 'PUT', $fields);
 		}
 		
-		public function remove($id){
+		public function remove($blog_id, $id){
 			return sendToAPI($this->prefix . "/" . $id, 'DELETE');
 		}
 		

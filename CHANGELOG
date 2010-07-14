@@ -1,5 +1,8 @@
 CHANGELOG
 
+July 14th, 2010
+  - Fixed a bug in Blog::remove -- missing $blog_id parameter
+
 July 7th, 2010
   - Added some better error checking with XML results. An array will not be returned with errors if there is any.
 
