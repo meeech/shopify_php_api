@@ -20,23 +20,23 @@
 		
 		function testURLEncodeArray(){
 			$array = array('one' => 1, 'two' => 'to o', 'three' => array('blah'));
-			$this->assertTrue(url_encode_array($array) == "one=1&two=to%20o");
+			$this->assertEqual("one=1&two=to%20o", url_encode_array($array));
 		}
 		
 		function testOrganizeArray(){
 			$array1 = array('something' => array(array('id' => 4), array('id' => 5)));
 			$array2 = array('something' => array(4 => array('id' => 4), 5 => array('id' => 5)));
-			$this->assertTrue(organizeArray($array1, 'something') == $array2);
+			$this->assertEqual($array2, organizeArray($array1, 'something'));
 		}
 		
 		function testArrayToXML(){
 			$array = array('something' => array('one' => 1, 'two' => array('too' => 2)));
 			$xml = '<?xml version="1.0" encoding="UTF-8"?><something><one>1</one><two><too>2</too></two></something>';
-			$this->assertTrue(arrayToXML($array) == $xml);
+			$this->assertEqual($xml, arrayToXML($array));
 		}
 				
 		function testGZDecode(){
-			$this->assertTrue(gzdecode(gzencode("this is some text")) == "this is some text");
+			$this->assertEqual("this is some text", gzdecode(gzencode("this is some text")));
 		}
 		
 	}
