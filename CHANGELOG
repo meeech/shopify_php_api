@@ -3,6 +3,11 @@ CHANGELOG
 July 14th, 2010
   - Fixed a bug in Blog::remove -- missing $blog_id parameter
 
+July 9th, 2010
+  - Fixed some bugs in ApplicationCharge and RecurringApplicationCharge
+  - Made some modifications to both ApplicationCharge::get, ApplicationCharge::activate, RecurringApplicationCharge::get, RecurringApplicationCharge::activate
+    to make getting charges from the API easier, and the process of activation easier.
+
 July 7th, 2010
   - Added some better error checking with XML results. An array will not be returned with errors if there is any.
 

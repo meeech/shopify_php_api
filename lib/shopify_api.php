@@ -109,9 +109,9 @@
 			$this->prefix = $site .  $this->prefix;
 		}
 		
-		public function get($cache = false){
-			if (!$cache || !isset($this->array['record'])) $this->array = organizeArray(sendToAPI($this->prefix), 'record');
-			return $this->array['record'];
+		public function get($id = 0, $cache = false){
+		  if (!$cache || ($id > 0 && !isset($this->array['application-charge'][$id]))) $this->array = organizeArray(sendToAPI($this->prefix), 'application-charge');
+			return ($id == 0) ? $this->array['application-charge'] : $this->array['application-charge'][$id];
 		}
 		
 		public function create($fields){
@@ -120,7 +120,8 @@
 		}
 		
 		public function activate($id){
-			return sendToAPI($this->prefix . "/" . $id . "/activate", 'PUT');
+		  if (!isset($this->array['record'][$id])) $this->get($id);
+			return sendToAPI($this->prefix . "/" . $id . "/activate", 'POST', array('application-charge' => $this->array['application-charge'][$id]));
 		}
 		
 		public function __destruct(){
@@ -137,9 +138,9 @@
 			$this->prefix = $site .  $this->prefix;
 		}
 		
-		public function get($cache = false){
-			if (!$cache || !isset($this->array['recurring-application-charge'])) $this->array = organizeArray(sendToAPI($this->prefix), 'recurring-application-charge');		
-			return $this->array['recurring-application-charge'];
+		public function get($id = 0, $cache = false){
+		  if (!$cache || ($id > 0 && !isset($this->array['recurring-application-charge'][$id]))) $this->array = organizeArray(sendToAPI($this->prefix), 'recurring-application-charge');
+			return ($id == 0) ? $this->array['recurring-application-charge'] : $this->array['recurring-application-charge'][$id];
 		}
 		
 		public function create($fields){
@@ -148,7 +149,8 @@
 		}
 		
 		public function activate($id){
-			return sendToAPI($this->prefix . "/" . $id . "/activate", 'PUT');
+		  if (!isset($this->array['recurring-application-charge'][$id])) $this->get($id);
+			return sendToAPI($this->prefix . "/" . $id . "/activate", 'POST', array('recurring-application-charge' => $this->array['recurring-application-charge'][$id]));
 		}
 		
 		public function cancel($id){
