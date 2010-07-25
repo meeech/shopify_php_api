@@ -797,7 +797,7 @@
 				
 		public function create($fields){
 			$fields = array('product' => $fields);
-			return sendToAPI($this->prefix . "product", 'POST', $fields);
+			return sendToAPI($this->prefix . "products", 'POST', $fields);
 		}
 		
 		public function modify($id, $fields){
