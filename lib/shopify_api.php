@@ -1349,29 +1349,32 @@
       $executed = false;
 
       foreach ($children as $k => $v){ 
-		    if (is_array($array)){
-      	  if (array_key_exists($k , $array)){ 		
-	        	if (array_key_exists(0 ,$array[$k])){ 
-	          	$i = count($array[$k]); 
-	          	$this->recurseXML($v, $array[$k][$i]);     
-	        	}else{ 
-	            $tmp = $array[$k]; 
-	            $array[$k] = array(); 
-	            $array[$k][0] = $tmp; 
-	            $i = count($array[$k]); 
-	            $this->recurseXML($v, $array[$k][$i]); 
-	          } 
-	        }else{ 
+		if (is_array($array) && !empty($array)){
+            if (array_key_exists($k , $array)){
+                if (is_array($array[$k]) && array_key_exists(0 ,$array[$k])){ 
+	                $i = count($array[$k]); 
+                    $this->recurseXML($v, $array[$k][$i]);
+	            }
+	            else { 
+    	            $tmp = $array[$k]; 
+    	            $array[$k] = array(); 
+    	            $array[$k][0] = $tmp; 
+    	            $i = count($array[$k]); 
+    	            $this->recurseXML($v, $array[$k][$i]); 
+	            }
+	        }
+	        else{ 
 	        	$array[$k] = array(); 
 	        	$this->recurseXML($v, $array[$k]);    
 	        }
-				}else{
+		}
+		else {
 					$array[$k] = array(); 
         	$this->recurseXML($v, $array[$k]);
-				} 
+		} 
 		    
-		    $executed = true; 
-      }
+		$executed = true; 
+    }
       
       if (!$executed && isEmpty($children->getName())){ 
           $array = (string)$xml; 
