@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: June 14th, 2010
-	Version: 1.20100714.1
+	Modified: July 26th, 2010
+	Version: 1.20100726.1
 */
 
   include('shopify_api_config.php');
@@ -11,6 +11,16 @@
 	//this function is just to make the code a little cleaner
 	function isEmpty($string){
 		return (strlen(trim($string)) == 0);
+	}
+	
+	/* Special XML Attributes for posting to Shopify */
+	/* Created function for these special cases because constant arrays cannot be defined */
+	function specialCases($key = ''){
+	  return array(
+  	  'variants' => 'variant',
+  	  'images' => 'image',
+  	  'options' => 'option'
+  	);
 	}
 	
 	//this function will url encode paramaters assigned to API calls
@@ -56,12 +66,19 @@
 		return $array;
 	}
 	
-	function arrayToXML($array, $xml = ''){
-		if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+	function arrayToXML($array, $xml = '', $specialCaseTag = ''){
+	  if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+	  $specialCases = specialCases();
 		foreach($array as $k => $v){
+		  if (is_numeric($k) && !isEmpty($specialCaseTag)) $k = $specialCaseTag;
 			if (is_array($v)){
-				$xml .= '<' . $k . '>';
-				$xml = arrayToXML($v, $xml);
+			  if (array_key_exists($k, $specialCases)){
+				  $xml .= '<' . $k . ' type="array">';
+				  $xml = arrayToXML($v, $xml, $specialCases[$k]);
+			  }else{
+			    $xml .= '<' . $k . '>';
+				  $xml = arrayToXML($v, $xml);
+			  }
 				$xml .= '</' . $k . '>';
 			}else{
 				$xml .= '<' . $k . '>' . $v . '</' . $k . '>';
@@ -797,7 +814,7 @@
 				
 		public function create($fields){
 			$fields = array('product' => $fields);
-			return sendToAPI($this->prefix . "product", 'POST', $fields);
+			return sendToAPI($this->prefix . "products", 'POST', $fields);
 		}
 		
 		public function modify($id, $fields){

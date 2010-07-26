@@ -1,5 +1,24 @@
 CHANGELOG
 
+July 26th, 2010
+  - Fixed a bug in arrayToXML to fix creating products with variants, images and options (thanks for the report and proposed fix by meeech! (http://github.com/meeech/))
+  - Example array to create product with variants
+    $fields = array(
+        'product-type' => 'Product',
+        'body-html' => 'This is some HTML for the Product',
+        'title' => 'This is a title',
+        'variants' => array(
+            array(
+                'price' => 10.00,
+                'option1' => 'first'
+            ),
+            array(
+              'price' => 11.00,
+              'option1' => 'second'
+            )
+        )
+    );
+
 July 14th, 2010
   - Fixed a bug in Blog::remove -- missing $blog_id parameter
 
