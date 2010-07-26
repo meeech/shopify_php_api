@@ -56,18 +56,99 @@
 		return $array;
 	}
 	
+	//Basic issue seems to be that PHP Array doesn't map properly to XML
+	//IE: You can't have 
+/*
+    'variants' => array(
+        'variant' => array(
+            'price'=>'10.00',
+            'option1' =>'first'
+        ),
+        'variant' => array(
+            'price'=>'10.00',
+            'option1' =>'first'
+        )
+    ),
+*/
+    //The last variant key overrides the previous ones. 
+    //Also, this arrayToXML doesnt seem to account for attribs,
+    //so you can sneak in a key like variants type="array" (which the API seems to require)
+    // but then you end up with that attrib in the closing tag as well
+    //So, this is a patch to deal with these specific scenarios.
+    //
+    //I find working with XML in PHP a PITA (i dont think i'm alone here :) ) , 
+    //so this is a hack fix for my needs, and we will build up the special cases as we go. (ie: images tag as well)
+    //
+    // Usage: 
+/*
+    'variants' => array(
+        'variant-1' => array(
+            'price'=>'10.00',
+            'option1' =>'first'
+        ),
+        'variant-2' => array(
+            'price'=>'10.00',
+            'option1' =>'first'
+        )
+    ),
+*/
 	function arrayToXML($array, $xml = ''){
 		if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>';
 		foreach($array as $k => $v){
+		    
+            $tag = fixTagXML($k);
+            $tagClose = fixTagCloseXML($k);
 			if (is_array($v)){
-				$xml .= '<' . $k . '>';
+				$xml .= '<' . $tag . '>';
 				$xml = arrayToXML($v, $xml);
-				$xml .= '</' . $k . '>';
+				$xml .= '</' . $tagClose . '>';
 			}else{
-				$xml .= '<' . $k . '>' . $v . '</' . $k . '>';
+				$xml .= '<' . $tag . '>' . $v . '</' . $tagClose . '>';
 			}
 		}	
 		return $xml;
+	}
+	
+	/**
+	 * Fix up the tag for xml generation.
+	 * ie: variant-1, add the type attribute to variants
+	 *
+	 * @param string $tag
+	 * @return string
+	 **/
+    function fixTagXML($tag) {
+        switch (true) {
+            //In our array of fields, we will mark variant keys as variant-#
+            case (strpos($tag, 'variant-') === 0) :
+                return 'variant';
+            break;
+
+            case ('variants' == $tag) :
+                return 'variants type="array"';
+            break;
+           
+            default:
+                return $tag;
+            break;
+       }
+    }
+	
+	/**
+	 * Fix up the close tag for a XML element
+	 *
+	 * @param string $tag
+	 * @return string
+	 **/
+	function fixTagCloseXML($tag) {
+        switch (true) {
+            case (strpos($tag, 'variant-') === 0) :
+                return 'variant';
+            break;
+            
+            default:
+                return $tag;
+            break;
+        }
 	}
 	
 	function sendToAPI($url, $request = 'GET', $xml = array()){
