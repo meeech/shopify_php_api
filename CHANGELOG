@@ -1,5 +1,8 @@
 CHANGELOG
 
+July 29th, 2010
+  - Fixed a minor typo and a bug in url_encode_params (thanks daniellmb!)
+
 July 26th, 2010
   - Fixed a bug in arrayToXML to fix creating products with variants, images and options (thanks for the report and proposed fix by meeech! (http://github.com/meeech/))
   - Example array to create product with variants

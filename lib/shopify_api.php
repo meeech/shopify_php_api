@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: July 26th, 2010
-	Version: 1.20100726.1
+	Modified: July 29th, 2010
+	Version: 1.20100729.1
 */
 
   include('shopify_api_config.php');
@@ -26,7 +26,7 @@
 	//this function will url encode paramaters assigned to API calls
 	function url_encode_array($params){
 		$string = '';
-		if (sizeof($params) > 0){
+		if (is_array($params)){
 			foreach($params as $k => $v) if (!is_array($v)) $string .= $k.'='.str_replace(' ', '%20', $v).'&';
 			$string = substr($string, 0, strlen($string) - 1);
 		}
@@ -60,7 +60,7 @@
 				$id = $v['id'];
 				$array[$type][$id] = $v;
 				unset($array[$type][$k]);
-			}		
+			}
 		}
 		
 		return $array;
@@ -691,7 +691,7 @@
 				return $this->array['order'];
 			}else{
 				if (!$cache || !isset($this->array['order'][$id])){
-					$temp = semdToAPI($this->prefix . "orders/" . $id);
+					$temp = sendToAPI($this->prefix . "orders/" . $id);
 					$this->array['order'][$id] = $temp;
 				}
 				return $this->array['order'][$id];
