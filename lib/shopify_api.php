@@ -101,8 +101,15 @@
 				$url .= '.xml';
 			}
 		}
+        
+        //Add a check to see if XML is empty. If it is, we set it to false, 
+        //so we can ignore it in the $ch->send().
+        if(!empty($xml)) {
+		    $xml = arrayToXML($xml);
+        } else {
+            $xml = false;
+        }
 
-		$xml = arrayToXML($xml);
 		$ch = new miniCURL();
 		$data = $ch->send($url, $request, $xml);	
 		return $ch->loadString($data);
@@ -1327,8 +1334,12 @@
 			
 			if (USE_SSL_PEM) $options[CURLOPT_CAINFO] = CA_FILE;
 			
-			if ($request != "GET"){ 
-				$options[CURLOPT_POSTFIELDS] = $xml_payload; 
+			if ($request != "GET"){
+			    //If there's no payload, don't set the postfields. 
+			    //Just causes error against shopify backend
+                if(false !== $xml_payload) {
+                    $options[CURLOPT_POSTFIELDS] = $xml_payload; 
+                }
 				$options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
 			}
 			
