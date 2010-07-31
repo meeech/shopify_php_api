@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: June 14th, 2010
-	Version: 1.20100714.1
+	Modified: July 29th, 2010
+	Version: 1.20100729.1
 */
 
   include('shopify_api_config.php');
@@ -13,10 +13,20 @@
 		return (strlen(trim($string)) == 0);
 	}
 	
+	/* Special XML Attributes for posting to Shopify */
+	/* Created function for these special cases because constant arrays cannot be defined */
+	function specialCases($key = ''){
+	  return array(
+  	  'variants' => 'variant',
+  	  'images' => 'image',
+  	  'options' => 'option'
+  	);
+	}
+	
 	//this function will url encode paramaters assigned to API calls
 	function url_encode_array($params){
 		$string = '';
-		if (sizeof($params) > 0){
+		if (is_array($params)){
 			foreach($params as $k => $v) if (!is_array($v)) $string .= $k.'='.str_replace(' ', '%20', $v).'&';
 			$string = substr($string, 0, strlen($string) - 1);
 		}
@@ -50,105 +60,31 @@
 				$id = $v['id'];
 				$array[$type][$id] = $v;
 				unset($array[$type][$k]);
-			}		
+			}
 		}
 		
 		return $array;
 	}
 	
-	//Basic issue seems to be that PHP Array doesn't map properly to XML
-	//IE: You can't have 
-/*
-    'variants' => array(
-        'variant' => array(
-            'price'=>'10.00',
-            'option1' =>'first'
-        ),
-        'variant' => array(
-            'price'=>'10.00',
-            'option1' =>'first'
-        )
-    ),
-*/
-    //The last variant key overrides the previous ones. 
-    //Also, this arrayToXML doesnt seem to account for attribs,
-    //so you can sneak in a key like variants type="array" (which the API seems to require)
-    // but then you end up with that attrib in the closing tag as well
-    //So, this is a patch to deal with these specific scenarios.
-    //
-    //I find working with XML in PHP a PITA (i dont think i'm alone here :) ) , 
-    //so this is a hack fix for my needs, and we will build up the special cases as we go. (ie: images tag as well)
-    //
-    // Usage: 
-/*
-    'variants' => array(
-        'variant-1' => array(
-            'price'=>'10.00',
-            'option1' =>'first'
-        ),
-        'variant-2' => array(
-            'price'=>'10.00',
-            'option1' =>'first'
-        )
-    ),
-*/
-	function arrayToXML($array, $xml = ''){
-		if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+	function arrayToXML($array, $xml = '', $specialCaseTag = ''){
+	  if ($xml == "") $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+	  $specialCases = specialCases();
 		foreach($array as $k => $v){
-		    
-            $tag = fixTagXML($k);
-            $tagClose = fixTagCloseXML($k);
+		  if (is_numeric($k) && !isEmpty($specialCaseTag)) $k = $specialCaseTag;
 			if (is_array($v)){
-				$xml .= '<' . $tag . '>';
-				$xml = arrayToXML($v, $xml);
-				$xml .= '</' . $tagClose . '>';
+			  if (array_key_exists($k, $specialCases)){
+				  $xml .= '<' . $k . ' type="array">';
+				  $xml = arrayToXML($v, $xml, $specialCases[$k]);
+			  }else{
+			    $xml .= '<' . $k . '>';
+				  $xml = arrayToXML($v, $xml);
+			  }
+				$xml .= '</' . $k . '>';
 			}else{
-				$xml .= '<' . $tag . '>' . $v . '</' . $tagClose . '>';
+				$xml .= '<' . $k . '>' . $v . '</' . $k . '>';
 			}
 		}	
 		return $xml;
-	}
-	
-	/**
-	 * Fix up the tag for xml generation.
-	 * ie: variant-1, add the type attribute to variants
-	 *
-	 * @param string $tag
-	 * @return string
-	 **/
-    function fixTagXML($tag) {
-        switch (true) {
-            //In our array of fields, we will mark variant keys as variant-#
-            case (strpos($tag, 'variant-') === 0) :
-                return 'variant';
-            break;
-
-            case ('variants' == $tag) :
-                return 'variants type="array"';
-            break;
-           
-            default:
-                return $tag;
-            break;
-       }
-    }
-	
-	/**
-	 * Fix up the close tag for a XML element
-	 *
-	 * @param string $tag
-	 * @return string
-	 **/
-	function fixTagCloseXML($tag) {
-        switch (true) {
-            case (strpos($tag, 'variant-') === 0) :
-                return 'variant';
-            break;
-            
-            default:
-                return $tag;
-            break;
-        }
 	}
 	
 	function sendToAPI($url, $request = 'GET', $xml = array()){
@@ -755,7 +691,7 @@
 				return $this->array['order'];
 			}else{
 				if (!$cache || !isset($this->array['order'][$id])){
-					$temp = semdToAPI($this->prefix . "orders/" . $id);
+					$temp = sendToAPI($this->prefix . "orders/" . $id);
 					$this->array['order'][$id] = $temp;
 				}
 				return $this->array['order'][$id];
@@ -1430,32 +1366,29 @@
       $executed = false;
 
       foreach ($children as $k => $v){ 
-		if (is_array($array) && !empty($array)){
-            if (array_key_exists($k , $array)){
-                if (is_array($array[$k]) && array_key_exists(0 ,$array[$k])){ 
-	                $i = count($array[$k]); 
-                    $this->recurseXML($v, $array[$k][$i]);
-	            }
-	            else { 
-    	            $tmp = $array[$k]; 
-    	            $array[$k] = array(); 
-    	            $array[$k][0] = $tmp; 
-    	            $i = count($array[$k]); 
-    	            $this->recurseXML($v, $array[$k][$i]); 
-	            }
-	        }
-	        else{ 
+		    if (is_array($array)){
+      	  if (array_key_exists($k , $array)){ 		
+	        	if (array_key_exists(0 ,$array[$k])){ 
+	          	$i = count($array[$k]); 
+	          	$this->recurseXML($v, $array[$k][$i]);     
+	        	}else{ 
+	            $tmp = $array[$k]; 
+	            $array[$k] = array(); 
+	            $array[$k][0] = $tmp; 
+	            $i = count($array[$k]); 
+	            $this->recurseXML($v, $array[$k][$i]); 
+	          } 
+	        }else{ 
 	        	$array[$k] = array(); 
 	        	$this->recurseXML($v, $array[$k]);    
 	        }
-		}
-		else {
+				}else{
 					$array[$k] = array(); 
         	$this->recurseXML($v, $array[$k]);
-		} 
+				} 
 		    
-		$executed = true; 
-    }
+		    $executed = true; 
+      }
       
       if (!$executed && isEmpty($children->getName())){ 
           $array = (string)$xml; 
