@@ -102,9 +102,10 @@
 			}
 		}
 
-		$xml = arrayToXML($xml);
+    $xml = arrayToXML($xml);
+    if (isEmpty($xml)) $xml = false;
 		$ch = new miniCURL();
-		$data = $ch->send($url, $request, $xml);	
+		$data = $ch->send($url, $request, $xml);
 		return $ch->loadString($data);
 	}
 	
@@ -1326,11 +1327,8 @@
 			);
 			
 			if (USE_SSL_PEM) $options[CURLOPT_CAINFO] = CA_FILE;
-			
-			if ($request != "GET"){ 
-				$options[CURLOPT_POSTFIELDS] = $xml_payload; 
-				$options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
-			}
+			if ($request != "GET") $options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
+			if ($xml_payload !== false) $options[CURLOPT_POSTFIELDS] = $xml_payload;
 			
 			curl_setopt_array($this->ch, $options);
 			if (!curl_exec($this->ch)) die(curl_error($this->ch));
@@ -1345,7 +1343,8 @@
 			$array = array();
 				
 			if (FORMAT == "xml"){
-        if (preg_match("/\<[html]\>/", $data) == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
+			  
+        if (preg_match("/\<[html xmlns]/", $data) == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
           if (!function_exists('simplexml_load_string')) die("SimpleXML library not installed. Either change format to .json or upgrade your version of PHP");
 				  $xml = simplexml_load_string($data);
 				  $this->recurseXML($xml, $array);
@@ -1367,8 +1366,8 @@
 
       foreach ($children as $k => $v){ 
 		    if (is_array($array)){
-      	  if (array_key_exists($k , $array)){ 		
-	        	if (array_key_exists(0 ,$array[$k])){ 
+      	  if (array_key_exists($k, $array)){
+	        	if (is_array($array[$k]) && array_key_exists(0, $array[$k])){ 
 	          	$i = count($array[$k]); 
 	          	$this->recurseXML($v, $array[$k][$i]);     
 	        	}else{ 

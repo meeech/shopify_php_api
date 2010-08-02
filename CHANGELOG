@@ -1,5 +1,9 @@
 CHANGELOG
 
+August 2nd, 2010
+  - Fixed a bug with removing objects through the API (thanks meeech!)
+  - Fixed an issue in recurseXML to properly return errors
+
 July 29th, 2010
   - Fixed a minor typo and a bug in url_encode_params (thanks daniellmb!)
 
