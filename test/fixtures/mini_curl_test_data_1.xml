@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products type="array">
+  <product>
+    <body-html>&lt;p&gt;So this is a product.&lt;/p&gt;
+&lt;p&gt;The text you see here is a Product Description. Every product has a price, a weight, a picture and a description.  To edit the description of this product or to create a new product you can go to the &lt;a href=&quot;/admin/products&quot;&gt;Products Tab&lt;/a&gt; of the administration menu.&lt;/p&gt;
+
+&lt;p&gt;Once you have mastered the creation and editing of products you will want your products to show up on your Shopify site.  There is a two step process to do this.&lt;/p&gt;
+&lt;p&gt;First you need to add your products to a Collection.  A Collection is an easy way to group products together. If you go to the &lt;a href=&quot;/admin/collections&quot;&gt;Collections Tab&lt;/a&gt; of the administration menu you can begin creating collections and adding products to them.&lt;/p&gt;
+&lt;p&gt;Second you&#8217;ll need to create a link from your shop&#8217;s navigation menu to your Collections. You can do this by going to the &lt;a href=&quot;/admin/links&quot;&gt;Navigations Tab&lt;/a&gt; of the administration menu and clicking on &#8220;Add a link&#8221;.&lt;/p&gt;
+
+&lt;p&gt;Good luck with your shop!&lt;/p&gt;
+</body-html>
+    <created-at type="datetime">2010-05-04T13:13:32-04:00</created-at>
+    <handle>persistent-24-hour-artificial-intelligence</handle>
+    <id type="integer">16133622</id>
+    <product-type>Shirts</product-type>
+
+    <published-at type="datetime">2010-07-20T18:30:03-04:00</published-at>
+    <template-suffix nil="true"></template-suffix>
+    <title>Face Persistent 24 hour artificial intelligence</title>
+    <updated-at type="datetime">2010-07-20T18:30:03-04:00</updated-at>
+    <vendor>Shopify</vendor>
+    <tags>Demo, T-Shirt</tags>
+
+    <variants type="array">
+      <variant>
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+        <created-at type="datetime">2010-05-04T13:13:32-04:00</created-at>
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">40253192</id>
+
+        <inventory-management>shopify</inventory-management>
+        <inventory-policy>deny</inventory-policy>
+        <inventory-quantity type="integer">10</inventory-quantity>
+        <option1>Medium</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">1</position>
+
+        <price type="decimal">19.00</price>
+        <product-id type="integer">16133622</product-id>
+        <requires-shipping type="boolean">true</requires-shipping>
+        <sku></sku>
+        <taxable type="boolean">true</taxable>
+        <title>Medium</title>
+
+        <updated-at type="datetime">2010-06-02T10:00:05-04:00</updated-at>
+      </variant>
+    </variants>
+    <images type="array"/>
+    <options type="array">
+      <option>
+        <name>Title</name>
+      </option>
+
+    </options>
+  </product>
+  <product>
+    <body-html>&lt;p&gt;So this is a product.&lt;/p&gt;
+&lt;p&gt;The text you see here is a Product Description. Every product has a price, a weight, a picture and a description.  To edit the description of this product or to create a new product you can go to the &lt;a href=&quot;/admin/products&quot;&gt;Products Tab&lt;/a&gt; of the administration menu.&lt;/p&gt;
+
+&lt;p&gt;Once you have mastered the creation and editing of products you will want your products to show up on your Shopify site.  There is a two step process to do this.&lt;/p&gt;
+&lt;p&gt;First you need to add your products to a Collection.  A Collection is an easy way to group products together. If you go to the &lt;a href=&quot;/admin/collections&quot;&gt;Collections Tab&lt;/a&gt; of the administration menu you can begin creating collections and adding products to them.&lt;/p&gt;
+&lt;p&gt;Second you&amp;#8217;ll need to create a link from your shop&amp;#8217;s navigation menu to your Collections. You can do this by going to the &lt;a href=&quot;/admin/links&quot;&gt;Navigations Tab&lt;/a&gt; of the administration menu and clicking on &amp;#8220;Add a link&amp;#8221;.&lt;/p&gt;
+
+&lt;p&gt;Good luck with your shop!&lt;/p&gt;</body-html>
+    <created-at type="datetime">2010-05-04T13:13:31-04:00</created-at>
+    <handle>face-to-face-methodical-ability</handle>
+    <id type="integer">16133592</id>
+    <product-type>Shirts</product-type>
+    <published-at type="datetime">2010-07-20T18:30:03-04:00</published-at>
+
+    <template-suffix></template-suffix>
+    <title>Face to face methodical ability</title>
+    <updated-at type="datetime">2010-07-20T18:30:04-04:00</updated-at>
+    <vendor>Shopify</vendor>
+    <tags>Demo, T-Shirt</tags>
+    <variants type="array">
+      <variant>
+
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+        <created-at type="datetime">2010-05-04T13:13:31-04:00</created-at>
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">40253162</id>
+        <inventory-management>shopify</inventory-management>
+
+        <inventory-policy>deny</inventory-policy>
+        <inventory-quantity type="integer">3</inventory-quantity>
+        <option1>Medium</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">1</position>
+        <price type="decimal">19.00</price>
+
+        <product-id type="integer">16133592</product-id>
+        <requires-shipping type="boolean">true</requires-shipping>
+        <sku>medface</sku>
+        <taxable type="boolean">true</taxable>
+        <title>Medium</title>
+        <updated-at type="datetime">2010-06-09T13:34:05-04:00</updated-at>
+
+      </variant>
+      <variant>
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+        <created-at type="datetime">2010-05-13T09:30:01-04:00</created-at>
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">41811812</id>
+
+        <inventory-management>shopify</inventory-management>
+        <inventory-policy>deny</inventory-policy>
+        <inventory-quantity type="integer">77</inventory-quantity>
+        <option1>Large</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">2</position>
+
+        <price type="decimal">19.00</price>
+        <product-id type="integer">16133592</product-id>
+        <requires-shipping type="boolean">true</requires-shipping>
+        <sku>largeface</sku>
+        <taxable type="boolean">true</taxable>
+        <title>Large</title>
+
+        <updated-at type="datetime">2010-06-09T13:34:05-04:00</updated-at>
+      </variant>
+    </variants>
+    <images type="array">
+      <image>
+        <created-at type="datetime">2010-07-12T10:39:24-04:00</created-at>
+        <id type="integer">43447882</id>
+
+        <position type="integer">1</position>
+        <product-id type="integer">16133592</product-id>
+        <updated-at type="datetime">2010-07-12T10:39:24-04:00</updated-at>
+        <src>http://static.shopify.com/s/files/1/0048/7032/products/01_broken_image_earring.gif?1280935292</src>
+      </image>
+    </images>
+    <options type="array">
+
+      <option>
+        <name>Title</name>
+      </option>
+    </options>
+  </product>
+  <product>
+    <body-html nil="true"></body-html>
+    <created-at type="datetime">2010-08-02T10:43:23-04:00</created-at>
+
+    <handle>my-new-product</handle>
+    <id type="integer">21159912</id>
+    <product-type>Product</product-type>
+    <published-at type="datetime">2010-08-02T10:43:23-04:00</published-at>
+    <template-suffix nil="true"></template-suffix>
+    <title>My new product</title>
+
+    <updated-at type="datetime">2010-08-02T10:43:23-04:00</updated-at>
+    <vendor>Shopify</vendor>
+    <tags nil="true"></tags>
+    <variants type="array">
+      <variant>
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+        <created-at type="datetime">2010-08-02T10:43:23-04:00</created-at>
+
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">50150382</id>
+        <inventory-management nil="true"></inventory-management>
+        <inventory-policy>deny</inventory-policy>
+        <inventory-quantity type="integer">1</inventory-quantity>
+
+        <option1>Default</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">1</position>
+        <price type="decimal">0.00</price>
+        <product-id type="integer">21159912</product-id>
+        <requires-shipping type="boolean">true</requires-shipping>
+
+        <sku></sku>
+        <taxable type="boolean">true</taxable>
+        <title>Default</title>
+        <updated-at type="datetime">2010-08-02T10:43:23-04:00</updated-at>
+      </variant>
+    </variants>
+    <images type="array"/>
+
+    <options type="array">
+      <option>
+        <name>Title</name>
+      </option>
+    </options>
+  </product>
+  <product>
+    <body-html>&lt;p&gt;So this is a product.&lt;/p&gt;
+
+&lt;p&gt;The text you see here is a Product Description. Every product has a price, a weight, a picture and a description.  To edit the description of this product or to create a new product you can go to the &lt;a href=&quot;/admin/products&quot;&gt;Products Tab&lt;/a&gt; of the administration menu.&lt;/p&gt;
+&lt;p&gt;Once you have mastered the creation and editing of products you will want your products to show up on your Shopify site.  There is a two step process to do this.&lt;/p&gt;
+&lt;p&gt;First you need to add your products to a Collection.  A Collection is an easy way to group products together. If you go to the &lt;a href=&quot;/admin/collections&quot;&gt;Collections Tab&lt;/a&gt; of the administration menu you can begin creating collections and adding products to them.&lt;/p&gt;
+
+&lt;p&gt;Second you&amp;#8217;ll need to create a link from your shop&amp;#8217;s navigation menu to your Collections. You can do this by going to the &lt;a href=&quot;/admin/links&quot;&gt;Navigations Tab&lt;/a&gt; of the administration menu and clicking on &amp;#8220;Add a link&amp;#8221;.&lt;/p&gt;
+&lt;p&gt;Good luck with your shop!&lt;/p&gt;</body-html>
+
+    <created-at type="datetime">2010-05-04T13:13:31-04:00</created-at>
+    <handle>re-engineered-system-worthy-emulation</handle>
+    <id type="integer">16133602</id>
+    <product-type>Shirts</product-type>
+    <published-at type="datetime" nil="true"></published-at>
+    <template-suffix nil="true"></template-suffix>
+    <title>Re-engineered system-worthy emulation</title>
+
+    <updated-at type="datetime">2010-07-20T18:19:28-04:00</updated-at>
+    <vendor>Shopify</vendor>
+    <tags>Demo, T-Shirt</tags>
+    <variants type="array">
+      <variant>
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+        <created-at type="datetime">2010-05-04T13:13:32-04:00</created-at>
+
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">40253172</id>
+        <inventory-management>shopify</inventory-management>
+        <inventory-policy>deny</inventory-policy>
+        <inventory-quantity type="integer">1</inventory-quantity>
+
+        <option1>Medium</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">1</position>
+        <price type="decimal">19.00</price>
+        <product-id type="integer">16133602</product-id>
+        <requires-shipping type="boolean">true</requires-shipping>
+
+        <sku>medengineer</sku>
+        <taxable type="boolean">true</taxable>
+        <title>Medium</title>
+        <updated-at type="datetime">2010-06-02T12:10:35-04:00</updated-at>
+      </variant>
+    </variants>
+    <images type="array"/>
+
+    <options type="array">
+      <option>
+        <name>Title</name>
+      </option>
+    </options>
+  </product>
+  <product>
+    <body-html>&lt;p&gt;So this is a product.&lt;/p&gt;
+
+&lt;p&gt;The text you see here is a Product Description. Every product has a price, a weight, a picture and a description.  To edit the description of this product or to create a new product you can go to the &lt;a href=&quot;/admin/products&quot;&gt;Products Tab&lt;/a&gt; of the administration menu.&lt;/p&gt;
+&lt;p&gt;Once you have mastered the creation and editing of products you will want your products to show up on your Shopify site.  There is a two step process to do this.&lt;/p&gt;
+&lt;p&gt;First you need to add your products to a Collection.  A Collection is an easy way to group products together. If you go to the &lt;a href=&quot;/admin/collections&quot;&gt;Collections Tab&lt;/a&gt; of the administration menu you can begin creating collections and adding products to them.&lt;/p&gt;
+
+&lt;p&gt;Second you&amp;#8217;ll need to create a link from your shop&amp;#8217;s navigation menu to your Collections. You can do this by going to the &lt;a href=&quot;/admin/links&quot;&gt;Navigations Tab&lt;/a&gt; of the administration menu and clicking on &amp;#8220;Add a link&amp;#8221;.&lt;/p&gt;
+&lt;p&gt;Good luck with your shop!&lt;/p&gt;</body-html>
+
+    <created-at type="datetime">2010-05-04T13:13:32-04:00</created-at>
+    <handle>reduced-interactive-algorithm</handle>
+    <id type="integer">16133612</id>
+    <product-type>Shirts</product-type>
+    <published-at type="datetime">2010-07-20T18:30:04-04:00</published-at>
+    <template-suffix nil="true"></template-suffix>
+
+    <title>Reduced interactive algorithm</title>
+    <updated-at type="datetime">2010-07-20T18:30:04-04:00</updated-at>
+    <vendor>Shopify</vendor>
+    <tags>Demo, T-Shirt</tags>
+    <variants type="array">
+      <variant>
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+
+        <created-at type="datetime">2010-05-04T13:13:32-04:00</created-at>
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">40253182</id>
+        <inventory-management>shopify</inventory-management>
+        <inventory-policy>deny</inventory-policy>
+
+        <inventory-quantity type="integer">1</inventory-quantity>
+        <option1>Medium</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">1</position>
+        <price type="decimal">19.00</price>
+        <product-id type="integer">16133612</product-id>
+
+        <requires-shipping type="boolean">true</requires-shipping>
+        <sku>medreduced</sku>
+        <taxable type="boolean">true</taxable>
+        <title>Medium</title>
+        <updated-at type="datetime">2010-06-02T12:07:37-04:00</updated-at>
+      </variant>
+
+    </variants>
+    <images type="array"/>
+    <options type="array">
+      <option>
+        <name>Title</name>
+      </option>
+    </options>
+  </product>
+
+  <product>
+    <body-html>&lt;p&gt;So this is a product.&lt;/p&gt;
+&lt;p&gt;The text you see here is a Product Description. Every product has a price, a weight, a picture and a description.  To edit the description of this product or to create a new product you can go to the &lt;a href=&quot;/admin/products&quot;&gt;Products Tab&lt;/a&gt; of the administration menu.&lt;/p&gt;
+
+&lt;p&gt;Once you have mastered the creation and editing of products you will want your products to show up on your Shopify site.  There is a two step process to do this.&lt;/p&gt;
+&lt;p&gt;First you need to add your products to a Collection.  A Collection is an easy way to group products together. If you go to the &lt;a href=&quot;/admin/collections&quot;&gt;Collections Tab&lt;/a&gt; of the administration menu you can begin creating collections and adding products to them.&lt;/p&gt;
+&lt;p&gt;Second you&amp;#8217;ll need to create a link from your shop&amp;#8217;s navigation menu to your Collections. You can do this by going to the &lt;a href=&quot;/admin/links&quot;&gt;Navigations Tab&lt;/a&gt; of the administration menu and clicking on &amp;#8220;Add a link&amp;#8221;.&lt;/p&gt;
+
+&lt;p&gt;Good luck with your shop!&lt;/p&gt;</body-html>
+    <created-at type="datetime">2010-05-04T13:13:31-04:00</created-at>
+    <handle>virtual-explicit-capability</handle>
+    <id type="integer">16133582</id>
+    <product-type>Shirts</product-type>
+    <published-at type="datetime" nil="true"></published-at>
+
+    <template-suffix nil="true"></template-suffix>
+    <title>Virtual explicit capability</title>
+    <updated-at type="datetime">2010-07-20T18:19:28-04:00</updated-at>
+    <vendor>Shopify</vendor>
+    <tags>Demo, T-Shirt</tags>
+    <variants type="array">
+      <variant>
+
+        <compare-at-price type="decimal" nil="true"></compare-at-price>
+        <created-at type="datetime">2010-05-04T13:13:31-04:00</created-at>
+        <fulfillment-service>manual</fulfillment-service>
+        <grams type="integer">0</grams>
+        <id type="integer">40253152</id>
+        <inventory-management>shopify</inventory-management>
+
+        <inventory-policy>deny</inventory-policy>
+        <inventory-quantity type="integer">1</inventory-quantity>
+        <option1>Medium</option1>
+        <option2 nil="true"></option2>
+        <option3 nil="true"></option3>
+        <position type="integer">1</position>
+        <price type="decimal">19.00</price>
+
+        <product-id type="integer">16133582</product-id>
+        <requires-shipping type="boolean">true</requires-shipping>
+        <sku>medvirtual</sku>
+        <taxable type="boolean">true</taxable>
+        <title>Medium</title>
+        <updated-at type="datetime">2010-06-02T12:01:56-04:00</updated-at>
+
+      </variant>
+    </variants>
+    <images type="array"/>
+    <options type="array">
+      <option>
+        <name>Title</name>
+      </option>
+    </options>
+
+  </product>
+</products>

@@ -2,7 +2,37 @@
 	require_once('../lib/shopify_api.php'); 
 	require_once('../lib/shopify_api_config.php');
 	require_once('../simpletest/autorun.php');
-
+	
+	/*
+	  Creating my own mock classes because SimpleTest mocking doesn't
+	  work with PHP5 -- something about the way PHP classes are made in
+	  PHP5
+	*/
+	class MockMiniCurl extends miniCurl{
+	  private $fixture_no;
+	  
+	  public function __construct($fixture_no){
+	    $this->fixture_no = $fixture_no;
+	  }
+	  
+	  public function send(){
+	    return file_get_contents(__DIR__ . '/fixtures/mini_curl_test_data_'.$this->fixture_no.'.xml');
+	  }
+	}
+	
+  function mockSendToAPI($fixture_no){
+    $ch = new MockMiniCurl($fixture_no);
+    $data = $ch->send();
+    return $ch->loadString($data);
+  }
+	
+	class MockProdct extends Product{
+	  
+	  public function get(){
+	    return mockSendToAPI(1);
+	  }
+	}
+	
 	class TestingFunctions extends UnitTestCase{		
 		function testConfiguration(){				
 			$this->assertTrue(defined('API_KEY'));
@@ -55,6 +85,18 @@
 			$this->session = new Session('schneider-and-sons2771.myshopify.com', '31191cf000f9d1ee2bc97ddcdd5a76fd', API_KEY, 'this is a secret', true);
 			$this->assertTrue(substr_count($this->session->site(), 'this is a secret') > 0);
 		}
+	}
+
+	class TestMiniCurl extends UnitTestCase{
+	  public function testGet(){
+      $products = organizeArray(mockSendToAPI(1), 'product');
+      $products = $products['product'];
+      
+      $this->assertEqual(6, sizeof($products));
+      $this->assertTrue(is_array($products[16133622]));
+      $this->assertEqual('Face Persistent 24 hour artificial intelligence', $products[16133622]['title']);
+      $this->assertEqual(40253192, $products[16133622]['variants']['variant']['id']);
+	  }
 	}
 
 ?>

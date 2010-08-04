@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: July 29th, 2010
-	Version: 1.20100729.1
+	Modified: August 4th, 2010
+	Version: 1.20100804.1
 */
 
   include('shopify_api_config.php');
@@ -1343,8 +1343,7 @@
 			$array = array();
 				
 			if (FORMAT == "xml"){
-			  
-        if (preg_match("/\<[html xmlns]/", $data) == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
+        if (substr_count($data, '<html xmlns') == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
           if (!function_exists('simplexml_load_string')) die("SimpleXML library not installed. Either change format to .json or upgrade your version of PHP");
 				  $xml = simplexml_load_string($data);
 				  $this->recurseXML($xml, $array);
