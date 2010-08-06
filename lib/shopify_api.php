@@ -128,8 +128,16 @@
 		}
 		
 		public function get($id = 0, $cache = false){
-		  if (!$cache || ($id > 0 && !isset($this->array['application-charge'][$id]))) $this->array = organizeArray(sendToAPI($this->prefix), 'application-charge');
-			return ($id == 0) ? $this->array['application-charge'] : $this->array['application-charge'][$id];
+		  if ($id == 0){
+		    if (!$cache || !isset($this->array['application-charge'])) $this->array = organizeArray(sendToAPI($this->prefix), 'application-charge');
+		    return $this->array['application-charge'];
+		  }else{
+		    if (!$cache || !isset($this->array['application-charge'][$id])){
+		      $temp = sendToAPI($this->prefix . "/" . $id);
+		      $this->array['application-charge'][$id] = $temp;
+		    }
+		    return $this->array['application-charge'][$id];
+		  }
 		}
 		
 		public function create($fields){
@@ -138,7 +146,7 @@
 		}
 		
 		public function activate($id){
-		  if (!isset($this->array['record'][$id])) $this->get($id);
+		  if (!isset($this->array['application-charge'][$id])) $this->get($id);
 			return sendToAPI($this->prefix . "/" . $id . "/activate", 'POST', array('application-charge' => $this->array['application-charge'][$id]));
 		}
 		
@@ -157,8 +165,16 @@
 		}
 		
 		public function get($id = 0, $cache = false){
-		  if (!$cache || ($id > 0 && !isset($this->array['recurring-application-charge'][$id]))) $this->array = organizeArray(sendToAPI($this->prefix), 'recurring-application-charge');
-			return ($id == 0) ? $this->array['recurring-application-charge'] : $this->array['recurring-application-charge'][$id];
+		  if ($id == 0){
+		    if (!$cache || !isset($this->array['recurring-application-charge'])) $this->array = organizeArray(sendToAPI($this->prefix), 'recurring-application-charge');
+		    return $this->array['recurring-application-charge'];
+		  }else{
+		    if (!$cache || !isset($this->array['recurring-application-charge'][$id])){
+		      $temp = sendToAPI($this->prefix . "/" . $id);
+		      $this->array['recurring-application-charge'][$id] = $temp;
+		    }
+		    return $this->array['recurring-application-charge'][$id];
+		  }
 		}
 		
 		public function create($fields){
@@ -1364,34 +1380,34 @@
       $executed = false;
 
       foreach ($children as $k => $v){ 
-		    if (is_array($array)){
-      	  if (array_key_exists($k, $array)){
-	        	if (is_array($array[$k]) && array_key_exists(0, $array[$k])){ 
-	          	$i = count($array[$k]); 
-	          	$this->recurseXML($v, $array[$k][$i]);     
-	        	}else{ 
-	            $tmp = $array[$k]; 
-	            $array[$k] = array(); 
-	            $array[$k][0] = $tmp; 
-	            $i = count($array[$k]); 
-	            $this->recurseXML($v, $array[$k][$i]); 
-	          } 
-	        }else{ 
-	        	$array[$k] = array(); 
-	        	$this->recurseXML($v, $array[$k]);    
-	        }
-				}else{
-					$array[$k] = array(); 
-        	$this->recurseXML($v, $array[$k]);
-				} 
-		    
-		    $executed = true; 
+        if (is_array($array)){
+          if (array_key_exists($k, $array)){
+            if (is_array($array[$k]) && array_key_exists(0, $array[$k])){ 
+              $i = count($array[$k]); 
+              $this->recurseXML($v, $array[$k][$i]);     
+            }else{ 
+              $tmp = $array[$k]; 
+              $array[$k] = array(); 
+              $array[$k][0] = $tmp; 
+              $i = count($array[$k]); 
+              $this->recurseXML($v, $array[$k][$i]); 
+            } 
+          }else{ 
+            $array[$k] = array(); 
+            $this->recurseXML($v, $array[$k]);    
+          }
+        }else{
+          $array[$k] = array(); 
+          $this->recurseXML($v, $array[$k]);
+        } 
+
+        $executed = true; 
       }
-      
+
       if (!$executed && isEmpty($children->getName())){ 
-          $array = (string)$xml; 
+        $array = (string)$xml; 
       } 
-		}
+    }
 		
 		public function __destruct(){
 			empty($this->ch);			
