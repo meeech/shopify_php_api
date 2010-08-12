@@ -1,5 +1,8 @@
 CHANGELOG
 
+August 12th, 2010
+  - Fixed a typo in Event::get
+
 August 4th, 2010
   - Added a few tests, changed error conditions for getting data from the API
   - Updated get methods for ApplicationCharge and RecurringApplicationCharge

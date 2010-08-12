@@ -563,7 +563,7 @@
 			if ($product == 0 && $order == 0){
 				if ($event_id == 0){
 					$params = url_encode_array($params);
-					$this->array = organizrArray(sendToAPI($this->prefix . "events?" . $params), 'event');			
+					$this->array = organizeArray(sendToAPI($this->prefix . "events?" . $params), 'event');			
 					return $this->array['event'];
 				}else{
 					if (!$cache){
