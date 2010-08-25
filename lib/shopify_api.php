@@ -102,14 +102,6 @@
 			}
 		}
         
-        //Add a check to see if XML is empty. If it is, we set it to false, 
-        //so we can ignore it in the $ch->send().
-        if(!empty($xml)) {
-		    $xml = arrayToXML($xml);
-        } else {
-            $xml = false;
-        }
-
     $xml = arrayToXML($xml);
     if (isEmpty($xml)) $xml = false;
 		$ch = new miniCURL();
