@@ -2,8 +2,8 @@
 /*
 	Shopify API in PHP
 	Created: May 4th, 2010
-	Modified: July 29th, 2010
-	Version: 1.20100729.1
+	Modified: August 4th, 2010
+	Version: 1.20100804.1
 */
 
   include('shopify_api_config.php');
@@ -110,8 +110,10 @@
             $xml = false;
         }
 
+    $xml = arrayToXML($xml);
+    if (isEmpty($xml)) $xml = false;
 		$ch = new miniCURL();
-		$data = $ch->send($url, $request, $xml);	
+		$data = $ch->send($url, $request, $xml);
 		return $ch->loadString($data);
 	}
 	
@@ -134,8 +136,16 @@
 		}
 		
 		public function get($id = 0, $cache = false){
-		  if (!$cache || ($id > 0 && !isset($this->array['application-charge'][$id]))) $this->array = organizeArray(sendToAPI($this->prefix), 'application-charge');
-			return ($id == 0) ? $this->array['application-charge'] : $this->array['application-charge'][$id];
+		  if ($id == 0){
+		    if (!$cache || !isset($this->array['application-charge'])) $this->array = organizeArray(sendToAPI($this->prefix), 'application-charge');
+		    return $this->array['application-charge'];
+		  }else{
+		    if (!$cache || !isset($this->array['application-charge'][$id])){
+		      $temp = sendToAPI($this->prefix . "/" . $id);
+		      $this->array['application-charge'][$id] = $temp;
+		    }
+		    return $this->array['application-charge'][$id];
+		  }
 		}
 		
 		public function create($fields){
@@ -144,7 +154,7 @@
 		}
 		
 		public function activate($id){
-		  if (!isset($this->array['record'][$id])) $this->get($id);
+		  if (!isset($this->array['application-charge'][$id])) $this->get($id);
 			return sendToAPI($this->prefix . "/" . $id . "/activate", 'POST', array('application-charge' => $this->array['application-charge'][$id]));
 		}
 		
@@ -163,8 +173,16 @@
 		}
 		
 		public function get($id = 0, $cache = false){
-		  if (!$cache || ($id > 0 && !isset($this->array['recurring-application-charge'][$id]))) $this->array = organizeArray(sendToAPI($this->prefix), 'recurring-application-charge');
-			return ($id == 0) ? $this->array['recurring-application-charge'] : $this->array['recurring-application-charge'][$id];
+		  if ($id == 0){
+		    if (!$cache || !isset($this->array['recurring-application-charge'])) $this->array = organizeArray(sendToAPI($this->prefix), 'recurring-application-charge');
+		    return $this->array['recurring-application-charge'];
+		  }else{
+		    if (!$cache || !isset($this->array['recurring-application-charge'][$id])){
+		      $temp = sendToAPI($this->prefix . "/" . $id);
+		      $this->array['recurring-application-charge'][$id] = $temp;
+		    }
+		    return $this->array['recurring-application-charge'][$id];
+		  }
 		}
 		
 		public function create($fields){
@@ -553,7 +571,7 @@
 			if ($product == 0 && $order == 0){
 				if ($event_id == 0){
 					$params = url_encode_array($params);
-					$this->array = organizrArray(sendToAPI($this->prefix . "events?" . $params), 'event');			
+					$this->array = organizeArray(sendToAPI($this->prefix . "events?" . $params), 'event');			
 					return $this->array['event'];
 				}else{
 					if (!$cache){
@@ -1333,15 +1351,8 @@
 			);
 			
 			if (USE_SSL_PEM) $options[CURLOPT_CAINFO] = CA_FILE;
-			
-			if ($request != "GET"){
-			    //If there's no payload, don't set the postfields. 
-			    //Just causes error against shopify backend
-                if(false !== $xml_payload) {
-                    $options[CURLOPT_POSTFIELDS] = $xml_payload; 
-                }
-				$options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
-			}
+			if ($request != "GET") $options[CURLOPT_HTTPHEADER] = array('Content-Type: application/xml; charset=utf-8');
+			if ($xml_payload !== false) $options[CURLOPT_POSTFIELDS] = $xml_payload;
 			
 			curl_setopt_array($this->ch, $options);
 			if (!curl_exec($this->ch)) die(curl_error($this->ch));
@@ -1356,7 +1367,7 @@
 			$array = array();
 				
 			if (FORMAT == "xml"){
-        if (preg_match("/\<[html]\>/", $data) == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
+        if (substr_count($data, '<html xmlns') == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
           if (!function_exists('simplexml_load_string')) die("SimpleXML library not installed. Either change format to .json or upgrade your version of PHP");
 				  $xml = simplexml_load_string($data);
 				  $this->recurseXML($xml, $array);
@@ -1377,34 +1388,34 @@
       $executed = false;
 
       foreach ($children as $k => $v){ 
-		    if (is_array($array)){
-      	  if (array_key_exists($k , $array)){ 		
-	        	if (array_key_exists(0 ,$array[$k])){ 
-	          	$i = count($array[$k]); 
-	          	$this->recurseXML($v, $array[$k][$i]);     
-	        	}else{ 
-	            $tmp = $array[$k]; 
-	            $array[$k] = array(); 
-	            $array[$k][0] = $tmp; 
-	            $i = count($array[$k]); 
-	            $this->recurseXML($v, $array[$k][$i]); 
-	          } 
-	        }else{ 
-	        	$array[$k] = array(); 
-	        	$this->recurseXML($v, $array[$k]);    
-	        }
-				}else{
-					$array[$k] = array(); 
-        	$this->recurseXML($v, $array[$k]);
-				} 
-		    
-		    $executed = true; 
+        if (is_array($array)){
+          if (array_key_exists($k, $array)){
+            if (is_array($array[$k]) && array_key_exists(0, $array[$k])){ 
+              $i = count($array[$k]); 
+              $this->recurseXML($v, $array[$k][$i]);     
+            }else{ 
+              $tmp = $array[$k]; 
+              $array[$k] = array(); 
+              $array[$k][0] = $tmp; 
+              $i = count($array[$k]); 
+              $this->recurseXML($v, $array[$k][$i]); 
+            } 
+          }else{ 
+            $array[$k] = array(); 
+            $this->recurseXML($v, $array[$k]);    
+          }
+        }else{
+          $array[$k] = array(); 
+          $this->recurseXML($v, $array[$k]);
+        } 
+
+        $executed = true; 
       }
-      
+
       if (!$executed && isEmpty($children->getName())){ 
-          $array = (string)$xml; 
+        $array = (string)$xml; 
       } 
-		}
+    }
 		
 		public function __destruct(){
 			empty($this->ch);			
