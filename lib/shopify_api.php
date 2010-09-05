@@ -101,9 +101,18 @@
 				$url .= '.xml';
 			}
 		}
-        
-    $xml = arrayToXML($xml);
-    if (isEmpty($xml)) $xml = false;
+
+        //Problem here: DELETE doesn't seem to be working now. 
+        //arrayToXML is making the opening xml tag if nothing else, so the isempty seems to fail
+        if(!empty($xml)) {
+            $xml = arrayToXML($xml);
+        } else {
+            $xml = false;
+        }
+
+        //Not sure about this isEmpty is it even necessary?
+        if (isEmpty($xml)) $xml = false;
+
 		$ch = new miniCURL();
 		$data = $ch->send($url, $request, $xml);
 		return $ch->loadString($data);
