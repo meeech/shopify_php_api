@@ -3,7 +3,8 @@
 	Shopify API in PHP
 	Created: May 4th, 2010
 	Modified: July 29th, 2010
-	Version: 1.20100729.1
+	Modified: Feb 15th, 2014: Switch to oAuth
+	Version: 1.3.0
 */
 
   include('shopify_api_config.php');
@@ -1157,6 +1158,7 @@
 		private $private = false;
 		
 		private $url;
+		private $scope;
 		private $token;
 		private $name;
 		
@@ -1188,11 +1190,12 @@
 			BEGIN PUBLIC
 		*/
 		
-		public function __construct($url, $token = '', $api_key, $secret, $private = false, $params = array()){
+		public function __construct($url, $token = '', $api_key, $secret, $scope = 'read_products', $private = false, $params = array()){
 			$this->url = $url;
 			$this->token = (isEmpty($token)) ? $url : $token;
 			$this->api_key = $api_key;
 			$this->secret = $secret;
+			$this->scope = $scope;
 			$this->private = $private;
 			if (isset($params['signature'])){
 				$timestamp = $params['timestamp'];
