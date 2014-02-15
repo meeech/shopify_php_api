@@ -1362,7 +1362,7 @@
 		
 		public function loadString($data, $format = false){
 			$array = array();
-				
+	
 			//Allow override of format
 			if(!$format) {
 				$format = FORMAT;
@@ -1423,4 +1423,3 @@
 			empty($this->ch);			
 		}
 	}
-?>
