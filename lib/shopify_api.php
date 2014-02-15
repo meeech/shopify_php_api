@@ -1360,10 +1360,15 @@
 			return $data;
 		}
 		
-		public function loadString($data){
+		public function loadString($data, $format = false){
 			$array = array();
 				
-			if (FORMAT == "xml"){
+			//Allow override of format
+			if(!$format) {
+				$format = FORMAT;
+			}
+
+			if ($format == "xml"){
         if (preg_match("/\<[html]\>/", $data) == 0 && preg_match("/\<(.*?)\>/", $data) > 0){
           if (!function_exists('simplexml_load_string')) die("SimpleXML library not installed. Either change format to .json or upgrade your version of PHP");
 				  $xml = simplexml_load_string($data);
@@ -1372,7 +1377,7 @@
 			    $array = array('error' => $data);
 		    }
       }
-			else if (FORMAT == "json"){
+			else if ($format == "json"){
 				if (!function_exists('json_decode')) die("json library not installed. Either change format to .xml or upgrade your version of PHP");
 				$array = json_decode($data, true);
 				if (isset($array['count'])) $array = $array['count'];				
