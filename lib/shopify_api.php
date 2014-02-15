@@ -1234,7 +1234,11 @@
 		}
 			
 		public function create_permission_url(){
-			return (isEmpty($this->url) || isEmpty($this->api_key)) ? '' : 'http://' . $this->url . '/admin/api/auth?api_key=' . $this->api_key;
+			return (isEmpty($this->url) || isEmpty($this->api_key)) ? '' : 'https://' . $this->url . '/admin/oauth/authorize?client_id=' . $this->api_key . '&scope=' . $this->scope;
+		}
+
+		public function create_exchange_url($code){
+			return (isEmpty($this->url) || isEmpty($this->api_key)) ? '' : 'https://' . $this->url . '/admin/oauth/access_token?client_id=' . $this->api_key . '&client_secret=' . $this->secret . '&code=' . $code;
 		}
 		
 		/* Used to make all non-authetication calls */
@@ -1284,8 +1288,9 @@
 			BEGIN PRIVATE
 		*/
 		
+		// Just the token now. 
 		private function computed_password(){
-			return ($this->private) ? $this->secret : md5($this->secret . $this->token);
+			return ($this->private) ? $this->secret : $this->token;
 		}
 		
 		private function prepare_url($url){
