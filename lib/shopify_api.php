@@ -116,6 +116,7 @@
 		return $ch->loadString($data);
 	}
 
+	if(!function_exists('gzdecode')) {
 	function gzdecode($data){
 		$g = tempnam(GZIP_PATH, 'ff');
 		@file_put_contents($g, $data);
@@ -124,6 +125,7 @@
 		$d = ob_get_clean();
 		unlink($g);
 		return $d;
+	}
 	}
 
 	class ApplicationCharge{
