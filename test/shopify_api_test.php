@@ -36,7 +36,7 @@
 		}
 				
 		function testGZDecode(){
-			$this->assertTrue(gzdecode(gzencode("this is some text")) == "this is some text");
+			$this->assertTrue(my_gzdecode(gzencode("this is some text")) == "this is some text");
 		}
 		
 	}

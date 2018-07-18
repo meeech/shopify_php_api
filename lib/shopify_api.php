@@ -116,8 +116,7 @@
 		return $ch->loadString($data);
 	}
 
-	if(!function_exists('gzdecode')) {
-	function gzdecode($data){
+	function my_gzdecode($data){
 		$g = tempnam(GZIP_PATH, 'ff');
 		@file_put_contents($g, $data);
 		ob_start();
@@ -125,7 +124,6 @@
 		$d = ob_get_clean();
 		unlink($g);
 		return $d;
-	}
 	}
 
 	class ApplicationCharge{
@@ -1355,7 +1353,7 @@
 
 			curl_setopt_array($this->ch, $options);
 			if (!curl_exec($this->ch)) die(curl_error($this->ch));
-			$data = (!GZIP_ENABLED) ? curl_multi_getcontent($this->ch) : gzdecode(curl_multi_getcontent($this->ch));
+			$data = (!GZIP_ENABLED) ? curl_multi_getcontent($this->ch) : my_gzdecode(curl_multi_getcontent($this->ch));
 			$code = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
 			curl_close($this->ch);
 
